@@ -253,6 +253,11 @@ export function moveWithinStorage(
   return next
 }
 
+/**
+ * Layout bounds for the board canvas.
+ * Uses every tile position (including removed) so the board size stays fixed
+ * for the whole level as matches clear pieces.
+ */
 export function boardBounds(board: BoardTile[]): {
   minX: number
   maxX: number
@@ -260,8 +265,7 @@ export function boardBounds(board: BoardTile[]): {
   maxY: number
   maxZ: number
 } {
-  const active = board.filter((t) => !t.removed)
-  if (active.length === 0) {
+  if (board.length === 0) {
     return { minX: 0, maxX: 1, minY: 0, maxY: 1, maxZ: 0 }
   }
   let minX = Infinity
@@ -269,7 +273,7 @@ export function boardBounds(board: BoardTile[]): {
   let minY = Infinity
   let maxY = -Infinity
   let maxZ = 0
-  for (const t of active) {
+  for (const t of board) {
     minX = Math.min(minX, t.x)
     maxX = Math.max(maxX, t.x)
     minY = Math.min(minY, t.y)

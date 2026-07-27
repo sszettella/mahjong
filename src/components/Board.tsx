@@ -13,6 +13,11 @@ interface Props {
   onTileSize?: (size: { w: number; h: number }) => void
 }
 
+/** Stable key for a deal — layout positions, not which tiles remain. */
+function layoutKey(board: BoardTile[]): string {
+  return board.map((t) => `${t.id}:${t.x},${t.y},${t.z}`).join('|')
+}
+
 export function Board({
   board,
   selectedId,
@@ -23,6 +28,8 @@ export function Board({
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState({ w: 360, h: 420 })
+  // Lock tile size for the current deal so matches don't reflow the board
+  const lockedSizeRef = useRef<{ key: string; w: number; h: number } | null>(null)
 
   useEffect(() => {
     const el = scrollRef.current
@@ -42,32 +49,49 @@ export function Board({
     return () => ro.disconnect()
   }, [])
 
+  // Full layout bounds (includes removed tiles) — fixed for the level
   const { minX, maxX, minY, maxY, maxZ } = useMemo(() => boardBounds(board), [board])
+  const dealKey = useMemo(() => layoutKey(board), [board])
 
   const cols = maxX - minX + 1
   const rows = maxY - minY + 1
 
-  // Fit the full layout into the board-scroll area (use almost full width + height)
-  const tileW = useMemo(() => {
+  const { tileW, tileH } = useMemo(() => {
+    // New deal (restart/next level) — drop any previous lock
+    if (lockedSizeRef.current && lockedSizeRef.current.key !== dealKey) {
+      lockedSizeRef.current = null
+    }
+
+    // Already locked for this deal — keep size even if viewport jitter
+    if (lockedSizeRef.current?.key === dealKey) {
+      return { tileW: lockedSizeRef.current.w, tileH: lockedSizeRef.current.h }
+    }
+
     const padBudget = 10
     const availW = Math.max(80, viewport.w - padBudget * 2)
     const availH = Math.max(80, viewport.h - padBudget * 2)
 
     const gapFactorX = 1.02
-    const gapFactorY = 1.28 // tileH / tileW
+    const gapFactorY = 1.28
     const zFactor = 0.14 * (maxZ + 1) + 0.08 * maxZ
 
     const fromW = availW / (cols * gapFactorX + zFactor + 0.35)
     const fromH = availH / (rows * gapFactorY + zFactor + 0.35)
+    const w = Math.max(24, Math.min(78, Math.min(fromW, fromH)))
+    const h = w * 1.28
 
-    return Math.max(24, Math.min(78, Math.min(fromW, fromH)))
-  }, [viewport.w, viewport.h, cols, rows, maxZ])
+    // Only lock once we have a real measured viewport (not the default stub)
+    if (viewport.w > 200 && viewport.h > 150) {
+      lockedSizeRef.current = { key: dealKey, w, h }
+    }
 
-  const tileH = tileW * 1.28
+    return { tileW: w, tileH: h }
+  }, [viewport.w, viewport.h, cols, rows, maxZ, dealKey])
 
   useEffect(() => {
     onTileSize?.({ w: tileW, h: tileH })
   }, [tileW, tileH, onTileSize])
+
   const gapX = tileW * 1.02
   const gapY = tileH * 1.0
   const layerShift = Math.max(3, Math.round(tileW * 0.11))
