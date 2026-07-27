@@ -743,9 +743,9 @@
 
 .storage-slot-empty {
   aspect-ratio: 1 / 1.28;
-  border-radius: 8px;
-  border: 2px dashed rgba(232, 184, 74, 0.28);
-  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  border: 2px dashed rgba(255, 220, 160, 0.22);
+  background: rgba(255, 255, 255, 0.04);
   display: grid;
   place-items: center;
   min-height: 52px;
@@ -770,12 +770,6 @@
   pointer-events: none;
   cursor: default;
   border-radius: 10px;
-}
-
-.storage-slot-empty {
-  border-radius: 10px !important;
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 2px dashed rgba(255, 220, 160, 0.22) !important;
 }
 
 .storage-tile-static {
