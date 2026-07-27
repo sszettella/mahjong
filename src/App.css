@@ -400,7 +400,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px 8px;
+  padding: 4px 10px 4px;
   flex-shrink: 0;
 }
 
@@ -440,22 +440,24 @@
 }
 
 .board-scroll {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 10px;
+  /* Use almost full width of the phone */
+  padding: 4px 6px 6px;
   position: relative;
+  width: 100%;
 }
 
 /* Soft decorative leaf spots behind the board */
 .board-scroll::before {
   content: '';
   position: absolute;
-  inset: 8% 6%;
+  inset: 4% 2%;
   border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%;
   background:
     radial-gradient(ellipse 60% 50% at 30% 40%, rgba(140, 230, 180, 0.18), transparent 70%),
@@ -469,9 +471,10 @@
   margin: auto;
   flex-shrink: 0;
   z-index: 1;
-  /* Plush green felt pad — classic mobile mahjong table */
-  padding: 14px 12px;
-  border-radius: 22px;
+  /* Plush green felt pad — fills measured play area */
+  padding: 8px 6px;
+  border-radius: 18px;
+  max-width: 100%;
   background:
     radial-gradient(ellipse 90% 75% at 50% 35%, rgba(120, 210, 160, 0.28), transparent 65%),
     radial-gradient(ellipse 70% 60% at 50% 80%, rgba(20, 70, 50, 0.35), transparent 70%),
@@ -480,7 +483,7 @@
     inset 0 2px 0 rgba(200, 255, 220, 0.18),
     inset 0 -3px 8px rgba(0, 40, 25, 0.35),
     0 0 0 1px rgba(160, 230, 190, 0.15),
-    0 10px 32px rgba(8, 30, 22, 0.45);
+    0 8px 24px rgba(8, 30, 22, 0.4);
 }
 
 /* —— Tiles (opaque stacking — top face wins) —— */
@@ -767,25 +770,28 @@
   }
 }
 
-/* —— Storage rack (above board) —— */
+/* —— Storage rack (compact, above board) —— */
 .storage-rack {
   flex-shrink: 0;
-  padding: 4px 14px 10px;
+  padding: 2px 16px 6px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: linear-gradient(180deg, rgba(20, 55, 42, 0.35), transparent);
+  gap: 3px;
+  background: linear-gradient(180deg, rgba(20, 55, 42, 0.3), transparent);
 }
 
 .storage-label {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--cream-dim);
   padding: 0 2px;
+  max-width: 260px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .storage-count {
@@ -797,25 +803,27 @@
 .storage-slots {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  max-width: 360px;
+  gap: 6px;
+  /* Smaller than full width — leaves room for the board */
+  max-width: min(260px, 68vw);
   margin: 0 auto;
   width: 100%;
 }
 
 .storage-slot-empty {
   aspect-ratio: 1 / 1.28;
-  border-radius: 10px;
-  border: 2px dashed rgba(255, 220, 160, 0.22);
+  border-radius: 8px;
+  border: 1.5px dashed rgba(255, 220, 160, 0.22);
   background: rgba(255, 255, 255, 0.04);
   display: grid;
   place-items: center;
-  min-height: 52px;
+  min-height: 0;
+  max-height: 58px;
   pointer-events: none;
 }
 
 .storage-slot-empty .slot-plus {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: rgba(232, 184, 74, 0.35);
   font-weight: 300;
   line-height: 1;
@@ -827,11 +835,12 @@
   top: auto !important;
   width: 100% !important;
   height: auto !important;
+  max-height: 58px;
   aspect-ratio: 1 / 1.28;
   z-index: 1 !important;
   pointer-events: none;
   cursor: default;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .storage-tile-static {
@@ -1240,17 +1249,17 @@
 /* —— Toolbar (tile-styled control chips) —— */
 .game-toolbar {
   display: flex;
-  gap: 10px;
-  padding: 10px 14px calc(14px + var(--safe-bottom));
+  gap: 8px;
+  padding: 6px 12px calc(10px + var(--safe-bottom));
   flex-shrink: 0;
   background: linear-gradient(180deg, transparent 0%, rgba(8, 35, 28, 0.4) 40%);
 }
 
 .tool-btn {
   flex: 1;
-  min-height: 58px;
+  min-height: 52px;
   border-radius: 12px;
-  padding: 6px 4px 8px;
+  padding: 5px 4px 6px;
   /* Same bone extrusion language as mahjong tiles */
   background:
     linear-gradient(160deg, #efe6d4 0%, #d8cbb4 45%, #c4b49a 100%);
