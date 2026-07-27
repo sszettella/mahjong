@@ -14,8 +14,9 @@ interface Props {
   onDone: () => void
 }
 
-const CONFETTI_COUNT = 48
-const BURST_MS = 900
+const CONFETTI_COUNT = 72
+/** Keep overlay until the last rain piece fades */
+const BURST_MS = 2200
 
 const COLORS = [
   '#ff5c5c',
@@ -30,6 +31,8 @@ const COLORS = [
   '#ffffff',
   '#e8b84a',
   '#f0a0c8',
+  '#a8f0c8',
+  '#ffb4a2',
 ]
 
 type Shape = 'rect' | 'ribbon' | 'circle' | 'square'
@@ -51,38 +54,57 @@ export function MatchBurst({ burst, onDone }: Props) {
       const r5 = seeded(seed + i + 200)
       const r6 = seeded(seed + i + 250)
       const r7 = seeded(seed + i + 300)
+      const r8 = seeded(seed + i + 350)
 
-      // Burst outward with gravity bias downward
-      const angle = r1 * Math.PI * 2
-      const power = 70 + r2 * 140
-      const driftX = Math.cos(angle) * power * (0.55 + r3 * 0.7)
-      // Upward kick then fall
-      const lift = -40 - r4 * 90
-      const fall = 80 + r5 * 160
-      const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square']
+      // Initial pop: mostly upward + wide spread
+      const angle = -Math.PI * 0.15 - r1 * Math.PI * 0.7 // upper hemisphere bias
+      const popPower = 50 + r2 * 110
+      const popX = Math.cos(angle) * popPower * (r3 > 0.5 ? 1 : -1) * (0.4 + r3)
+      const popY = Math.sin(angle) * popPower - 30 - r4 * 50 // lift
+
+      // Mid drift (wind / sway) while floating
+      const sway = (r5 - 0.5) * 90
+
+      // Rain fall — far below the board
+      const rainY = 280 + r6 * 320
+      const rainX = popX * 0.35 + sway + (r7 - 0.5) * 60
+
+      const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon']
       const shape = shapes[Math.floor(r6 * shapes.length)]
+
+      // Staggered spawn so it feels like a shower, not one bang
+      const delay = r1 * 0.18 + (i % 8) * 0.012
+      // Longer fall times for rain feel
+      const duration = 1.35 + r2 * 0.75
 
       return {
         i,
-        color: COLORS[Math.floor(r7 * COLORS.length)],
+        color: COLORS[Math.floor(r8 * COLORS.length)],
         shape,
-        driftX,
-        lift,
-        fall,
-        delay: r1 * 0.08,
-        duration: 0.65 + r2 * 0.35,
+        popX,
+        popY,
+        midX: popX * 0.7 + sway * 0.5,
+        midY: popY * 0.35 + 20 + r4 * 40,
+        rainX,
+        rainY,
+        sway,
+        delay,
+        duration,
         rot0: r3 * 360,
-        rot1: (r4 - 0.5) * 720,
-        w: shape === 'ribbon' ? 4 + r5 * 4 : shape === 'circle' ? 6 + r5 * 6 : 6 + r5 * 8,
+        rot1: (r4 - 0.5) * 540,
+        rot2: (r5 - 0.5) * 900,
+        w: shape === 'ribbon' ? 3 + r5 * 4 : shape === 'circle' ? 5 + r5 * 6 : 5 + r5 * 7,
         h:
           shape === 'ribbon'
-            ? 14 + r6 * 16
+            ? 12 + r6 * 18
             : shape === 'circle'
-              ? 6 + r5 * 6
+              ? 5 + r5 * 6
               : shape === 'square'
-                ? 7 + r5 * 6
-                : 5 + r6 * 5,
+                ? 6 + r5 * 5
+                : 4 + r6 * 5,
         spin: r7 > 0.5 ? 1 : -1,
+        // Flutter speed variance for ribbons
+        flutter: 0.7 + r8 * 0.6,
       }
     })
   }, [burst])
@@ -118,30 +140,36 @@ export function MatchBurst({ burst, onDone }: Props) {
 
         <div className="match-spark">✦</div>
         <div className="match-pop-label">Match!</div>
+      </div>
 
-        <div className="confetti-field">
-          {pieces.map((p) => (
-            <span
-              key={p.i}
-              className={`confetti confetti-${p.shape}`}
-              style={
-                {
-                  '--c': p.color,
-                  '--dx': `${p.driftX}px`,
-                  '--lift': `${p.lift}px`,
-                  '--fall': `${p.fall}px`,
-                  '--delay': `${p.delay}s`,
-                  '--dur': `${p.duration}s`,
-                  '--rot0': `${p.rot0}deg`,
-                  '--rot1': `${p.rot1}deg`,
-                  '--spin': p.spin,
-                  '--w': `${p.w}px`,
-                  '--h': `${p.h}px`,
-                } as CSSProperties
-              }
-            />
-          ))}
-        </div>
+      {/* Full-screen rain field so confetti can fall off the bottom */}
+      <div className="confetti-field">
+        {pieces.map((p) => (
+          <span
+            key={p.i}
+            className={`confetti confetti-${p.shape}`}
+            style={
+              {
+                '--c': p.color,
+                '--pop-x': `${p.popX}px`,
+                '--pop-y': `${p.popY}px`,
+                '--mid-x': `${p.midX}px`,
+                '--mid-y': `${p.midY}px`,
+                '--rain-x': `${p.rainX}px`,
+                '--rain-y': `${p.rainY}px`,
+                '--delay': `${p.delay}s`,
+                '--dur': `${p.duration}s`,
+                '--rot0': `${p.rot0}deg`,
+                '--rot1': `${p.rot1}deg`,
+                '--rot2': `${p.rot2}deg`,
+                '--spin': p.spin,
+                '--w': `${p.w}px`,
+                '--h': `${p.h}px`,
+                '--flutter': p.flutter,
+              } as CSSProperties
+            }
+          />
+        ))}
       </div>
     </div>
   )

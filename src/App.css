@@ -1102,19 +1102,19 @@
   }
 }
 
-/* Confetti pieces */
+/* Confetti — pop, float, then rain with gravity */
 .confetti-field {
   position: absolute;
-  inset: -40px;
+  inset: 0;
   pointer-events: none;
   z-index: 4;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .confetti {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 42%;
   width: var(--w, 8px);
   height: var(--h, 8px);
   margin-left: calc(var(--w, 8px) / -2);
@@ -1122,9 +1122,11 @@
   background: var(--c, #ffd166);
   opacity: 0;
   will-change: transform, opacity;
-  animation: confettiBurst var(--dur, 0.8s) cubic-bezier(0.15, 0.7, 0.25, 1) forwards;
+  /* Ease-in on the long fall reads as gravity acceleration */
+  animation: confettiRain var(--dur, 1.6s) cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
   animation-delay: var(--delay, 0s);
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  transform-origin: center center;
 }
 
 .confetti-rect {
@@ -1141,36 +1143,54 @@
 
 .confetti-ribbon {
   border-radius: 1px;
-  /* thin strip that reads as streamer */
-  transform-origin: center center;
+  transform-origin: 50% 20%;
 }
 
-@keyframes confettiBurst {
+/* Physics stages: burst → hang → accelerate down like rain */
+@keyframes confettiRain {
   0% {
-    transform: translate(0, 0) rotate(var(--rot0, 0deg)) scale(0.3);
+    transform: translate(0, 0) rotate(var(--rot0, 0deg)) scale(0.25);
     opacity: 0;
   }
-  8% {
+  /* Pop into the air */
+  6% {
     opacity: 1;
   }
-  /* pop outward + up */
+  14% {
+    transform: translate(var(--pop-x), var(--pop-y))
+      rotate(calc(var(--rot0) + var(--rot1) * 0.25 * var(--spin, 1)))
+      scale(1.05);
+    opacity: 1;
+  }
+  /* Apex hang — slow horizontal drift */
   28% {
-    transform: translate(
-        calc(var(--dx) * 0.55),
-        var(--lift)
-      )
-      rotate(calc(var(--rot0) + var(--rot1) * 0.35 * var(--spin, 1)))
+    transform: translate(var(--mid-x), var(--mid-y))
+      rotate(calc(var(--rot0) + var(--rot1) * 0.55 * var(--spin, 1)))
       scale(1);
     opacity: 1;
   }
-  /* gravity fall + spin + fade */
-  100% {
+  /* Gravity takes over — accelerating fall */
+  55% {
     transform: translate(
-        var(--dx),
-        calc(var(--lift) + var(--fall))
+        calc(var(--mid-x) * 0.55 + var(--rain-x) * 0.45),
+        calc(var(--mid-y) + (var(--rain-y) - var(--mid-y)) * 0.4)
       )
-      rotate(calc(var(--rot0) + var(--rot1) * var(--spin, 1)))
-      scale(0.85);
+      rotate(calc(var(--rot0) + var(--rot1) * 0.8 * var(--spin, 1) + var(--rot2) * 0.2))
+      scale(0.98);
+    opacity: 1;
+  }
+  /* Rain through the bottom of the screen */
+  85% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(var(--rain-x), var(--rain-y))
+      rotate(
+        calc(
+          var(--rot0) + (var(--rot1) + var(--rot2)) * var(--spin, 1) * var(--flutter, 1)
+        )
+      )
+      scale(0.75);
     opacity: 0;
   }
 }
