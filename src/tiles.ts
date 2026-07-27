@@ -3,35 +3,35 @@ import type { TileFace } from './types'
 const CHARS = ['一', '二', '三', '四', '五', '六', '七', '八', '九']
 
 export const WINDS = [
-  { value: 0, label: 'East', symbol: '東', color: '#1a5fb4' },
-  { value: 1, label: 'South', symbol: '南', color: '#2ec27e' },
-  { value: 2, label: 'West', symbol: '西', color: '#c64600' },
-  { value: 3, label: 'North', symbol: '北', color: '#813d9c' },
+  { value: 0, label: 'East', symbol: '東', color: '#1a4db8' },
+  { value: 1, label: 'South', symbol: '南', color: '#0d8a45' },
+  { value: 2, label: 'West', symbol: '西', color: '#c43a00' },
+  { value: 3, label: 'North', symbol: '北', color: '#6b2d9b' },
 ]
 
 export const DRAGONS = [
-  { value: 0, label: 'Red', symbol: '中', color: '#c01c28' },
-  { value: 1, label: 'Green', symbol: '發', color: '#2ec27e' },
-  { value: 2, label: 'White', symbol: '白', color: '#3d3846' },
+  { value: 0, label: 'Red', symbol: '中', color: '#c8102e' },
+  { value: 1, label: 'Green', symbol: '發', color: '#0d8a45' },
+  { value: 2, label: 'White', symbol: '白', color: '#2a2a32' },
 ]
 
 export const FLOWERS = [
-  { value: 0, label: 'Plum', symbol: '梅', color: '#e01b24' },
-  { value: 1, label: 'Orchid', symbol: '蘭', color: '#1c71d8' },
-  { value: 2, label: 'Chrysanthemum', symbol: '菊', color: '#e5a50a' },
-  { value: 3, label: 'Bamboo Flower', symbol: '竹', color: '#26a269' },
+  { value: 0, label: 'Plum', symbol: '梅', color: '#d40d2a' },
+  { value: 1, label: 'Orchid', symbol: '蘭', color: '#1557c0' },
+  { value: 2, label: 'Chrysanthemum', symbol: '菊', color: '#d4940a' },
+  { value: 3, label: 'Bamboo Flower', symbol: '竹', color: '#0d8a45' },
 ]
 
 export const SEASONS = [
-  { value: 0, label: 'Spring', symbol: '春', color: '#2ec27e' },
-  { value: 1, label: 'Summer', symbol: '夏', color: '#e5a50a' },
-  { value: 2, label: 'Autumn', symbol: '秋', color: '#c64600' },
-  { value: 3, label: 'Winter', symbol: '冬', color: '#1c71d8' },
+  { value: 0, label: 'Spring', symbol: '春', color: '#0d8a45' },
+  { value: 1, label: 'Summer', symbol: '夏', color: '#d4940a' },
+  { value: 2, label: 'Autumn', symbol: '秋', color: '#c43a00' },
+  { value: 3, label: 'Winter', symbol: '冬', color: '#1557c0' },
 ]
 
 const DOT_COLORS = [
-  '#c01c28', '#c01c28', '#1a5fb4', '#1a5fb4', '#c01c28',
-  '#1a5fb4', '#c01c28', '#1a5fb4', '#c01c28',
+  '#c8102e', '#c8102e', '#1a4db8', '#1a4db8', '#c8102e',
+  '#1a4db8', '#c8102e', '#1a4db8', '#c8102e',
 ]
 
 /** Build the full 144-tile face pool (4 of each regular, 1 of each flower/season). */
