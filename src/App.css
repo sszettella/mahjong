@@ -801,29 +801,27 @@
 }
 
 .storage-slots {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
   gap: 6px;
-  /* Smaller than full width — leaves room for the board */
-  max-width: min(260px, 68vw);
   margin: 0 auto;
-  width: 100%;
 }
 
 .storage-slot-empty {
-  aspect-ratio: 1 / 1.28;
+  flex: 0 0 auto;
   border-radius: 8px;
   border: 1.5px dashed rgba(255, 220, 160, 0.22);
   background: rgba(255, 255, 255, 0.04);
   display: grid;
   place-items: center;
-  min-height: 0;
-  max-height: 58px;
+  box-sizing: border-box;
   pointer-events: none;
 }
 
 .storage-slot-empty .slot-plus {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: rgba(232, 184, 74, 0.35);
   font-weight: 300;
   line-height: 1;
@@ -833,10 +831,8 @@
   position: relative !important;
   left: auto !important;
   top: auto !important;
-  width: 100% !important;
-  height: auto !important;
-  max-height: 58px;
-  aspect-ratio: 1 / 1.28;
+  flex: 0 0 auto;
+  box-sizing: border-box;
   z-index: 1 !important;
   pointer-events: none;
   cursor: default;

@@ -9,9 +9,18 @@ interface Props {
   hintIds: string[]
   matchingIds?: string[]
   onSelect: (id: string) => void
+  /** Report board tile size so storage can match (never larger) */
+  onTileSize?: (size: { w: number; h: number }) => void
 }
 
-export function Board({ board, selectedId, hintIds, matchingIds = [], onSelect }: Props) {
+export function Board({
+  board,
+  selectedId,
+  hintIds,
+  matchingIds = [],
+  onSelect,
+  onTileSize,
+}: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState({ w: 360, h: 420 })
 
@@ -44,8 +53,6 @@ export function Board({ board, selectedId, hintIds, matchingIds = [], onSelect }
     const availW = Math.max(80, viewport.w - padBudget * 2)
     const availH = Math.max(80, viewport.h - padBudget * 2)
 
-    // layout width  ≈ tileW * (cols * gap + basePad + z*layer)
-    // layout height ≈ tileW * (rows * 1.28 * gap + basePad + z*layer)
     const gapFactorX = 1.02
     const gapFactorY = 1.28 // tileH / tileW
     const zFactor = 0.14 * (maxZ + 1) + 0.08 * maxZ
@@ -53,11 +60,14 @@ export function Board({ board, selectedId, hintIds, matchingIds = [], onSelect }
     const fromW = availW / (cols * gapFactorX + zFactor + 0.35)
     const fromH = availH / (rows * gapFactorY + zFactor + 0.35)
 
-    // Prefer filling the canvas; allow larger tiles than before
     return Math.max(24, Math.min(78, Math.min(fromW, fromH)))
   }, [viewport.w, viewport.h, cols, rows, maxZ])
 
   const tileH = tileW * 1.28
+
+  useEffect(() => {
+    onTileSize?.({ w: tileW, h: tileH })
+  }, [tileW, tileH, onTileSize])
   const gapX = tileW * 1.02
   const gapY = tileH * 1.0
   const layerShift = Math.max(3, Math.round(tileW * 0.11))

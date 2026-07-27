@@ -7,9 +7,10 @@ interface Props {
   storage: StorageSlots
   hintIds: string[]
   matchingIds?: string[]
-  /** Id of a board tile just parked — flash the slot that received it */
   parkFlashId?: string | null
   failed?: boolean
+  /** Board tile size — storage tiles must not exceed this */
+  tileSize?: { w: number; h: number } | null
 }
 
 export function StorageRack({
@@ -18,10 +19,15 @@ export function StorageRack({
   matchingIds = [],
   parkFlashId = null,
   failed,
+  tileSize = null,
 }: Props) {
   const filled = storage.filter(Boolean).length
   const matchSet = new Set(matchingIds)
   const atLimit = filled >= STORAGE_SAFE_MAX
+
+  // Cap storage tile size at board tile size (slightly smaller is fine)
+  const slotW = tileSize ? Math.max(22, Math.round(tileSize.w)) : 40
+  const slotH = tileSize ? Math.max(28, Math.round(tileSize.h)) : Math.round(slotW * 1.28)
 
   return (
     <div
@@ -35,17 +41,29 @@ export function StorageRack({
       role="region"
       aria-label={`Storage, ${filled} of ${STORAGE_SAFE_MAX} safe slots. A 4th tile fails the level.`}
     >
-      <div className="storage-label">
+      <div className="storage-label" style={{ maxWidth: slotW * 4 + 18 }}>
         <span>Storage</span>
         <span className={`storage-count ${atLimit ? 'at-limit' : ''}`}>
           {filled}/{STORAGE_SAFE_MAX}
           <span className="storage-fail-hint"> · 4th fails</span>
         </span>
       </div>
-      <div className="storage-slots">
+      <div
+        className="storage-slots"
+        style={{
+          width: slotW * 4 + 6 * 3,
+          maxWidth: '100%',
+        }}
+      >
         {Array.from({ length: STORAGE_SIZE }, (_, i) => {
           const tile = storage[i]
-          const isDangerSlot = i === STORAGE_SAFE_MAX // 4th slot (index 3)
+          const isDangerSlot = i === STORAGE_SAFE_MAX
+          const slotStyle = {
+            width: slotW,
+            height: slotH,
+            minHeight: slotH,
+            maxHeight: slotH,
+          }
 
           if (tile) {
             const hinted = hintIds.includes(tile.id)
@@ -65,6 +83,7 @@ export function StorageRack({
                 ]
                   .filter(Boolean)
                   .join(' ')}
+                style={slotStyle}
                 aria-label={`${tile.face.label} in storage`}
                 data-face={faceKey(tile.face)}
               >
@@ -84,6 +103,7 @@ export function StorageRack({
               ]
                 .filter(Boolean)
                 .join(' ')}
+              style={slotStyle}
               aria-label={
                 isDangerSlot
                   ? 'Danger slot — parking a 4th tile fails the level'
