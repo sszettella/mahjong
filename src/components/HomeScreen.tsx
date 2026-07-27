@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Progress } from '../types'
 import { totalStars } from '../storage'
 
@@ -27,6 +27,8 @@ export function HomeScreen({ progress, onPlay, onLevels, onHowTo }: Props) {
   )
   const [installed, setInstalled] = useState(false)
   const [showInstallHelp, setShowInstallHelp] = useState(false)
+  const screenRef = useRef<HTMLDivElement>(null)
+  const installHelpRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setInstalled(isStandalone())
@@ -40,8 +42,47 @@ export function HomeScreen({ progress, onPlay, onLevels, onHowTo }: Props) {
     }
   }, [])
 
+  useEffect(() => {
+    if (!showInstallHelp) return
+    // Wait a frame so the panel is laid out, then scroll it fully into view
+    const id = window.requestAnimationFrame(() => {
+      installHelpRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      })
+      // Also nudge the screen container so short phones show the full card
+      const screen = screenRef.current
+      const help = installHelpRef.current
+      if (screen && help) {
+        const helpBottom = help.offsetTop + help.offsetHeight + 24
+        const visible = screen.scrollTop + screen.clientHeight
+        if (helpBottom > visible) {
+          screen.scrollTo({
+            top: helpBottom - screen.clientHeight,
+            behavior: 'smooth',
+          })
+        }
+      }
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [showInstallHelp])
+
+  const toggleInstallHelp = () => {
+    setShowInstallHelp((v) => !v)
+  }
+
   return (
-    <div className="screen home-screen">
+    <div
+      ref={screenRef}
+      className={[
+        'screen',
+        'home-screen',
+        showInstallHelp ? 'home-screen-expanded' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className="home-hero">
         <div className="home-ornament" aria-hidden>
           <span>🀄</span>
@@ -86,7 +127,8 @@ export function HomeScreen({ progress, onPlay, onLevels, onHowTo }: Props) {
           <button
             type="button"
             className="btn btn-secondary"
-            onClick={() => setShowInstallHelp((v) => !v)}
+            onClick={toggleInstallHelp}
+            aria-expanded={showInstallHelp}
           >
             Install for Offline
           </button>
@@ -94,7 +136,7 @@ export function HomeScreen({ progress, onPlay, onLevels, onHowTo }: Props) {
       </div>
 
       {showInstallHelp && !installed && (
-        <div className="install-help">
+        <div ref={installHelpRef} className="install-help" tabIndex={-1}>
           <h3>Play anywhere, even offline</h3>
           <ol>
             <li>

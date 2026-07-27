@@ -37,6 +37,19 @@
   padding: 24px 20px 32px;
   gap: 28px;
   text-align: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.home-screen > * {
+  flex-shrink: 0;
+}
+
+.home-screen.home-screen-expanded {
+  justify-content: flex-start;
+  padding-top: 16px;
 }
 
 .home-hero {
