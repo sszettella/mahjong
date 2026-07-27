@@ -439,70 +439,95 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 8px;
+  padding: 8px 10px;
 }
 
 .board {
   position: relative;
   margin: auto;
   flex-shrink: 0;
+  /* Soft felt pad under the layout */
+  padding: 10px;
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 40%, rgba(80, 140, 100, 0.22), transparent 70%),
+    linear-gradient(180deg, rgba(40, 55, 48, 0.45), rgba(20, 28, 24, 0.55));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 28px rgba(0, 0, 0, 0.35);
 }
 
-/* —— Tiles (premium bone / lacquer look) —— */
+/* —— Tiles (Vita-inspired soft bone / glossy mobile look) —— */
 .mahjong-tile {
   position: absolute;
   border: none;
   padding: 0;
-  border-radius: 8px;
-  /* Side wall (jade-green edge like classic tiles) */
+  border-radius: 12px;
+  /* Soft extruded body — warm taupe like Vita classic sets */
   background:
-    linear-gradient(145deg, #2a6b4a 0%, #1a4a32 40%, #0f3222 100%);
+    linear-gradient(160deg, #efe6d4 0%, #d8cbb4 45%, #c4b49a 100%);
   box-shadow:
-    3px 4px 0 #0a1a12,
-    4px 6px 10px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset -1px -1px 0 rgba(0, 0, 0, 0.25);
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 -2px 0 rgba(90, 70, 45, 0.12) inset,
+    2px 3px 0 #a89478,
+    3px 5px 0 #8a7660,
+    4px 8px 14px rgba(30, 20, 10, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    filter 0.12s ease;
+    transform 0.14s cubic-bezier(0.34, 1.2, 0.64, 1),
+    box-shadow 0.14s ease,
+    filter 0.14s ease;
   -webkit-user-select: none;
   touch-action: manipulation;
 }
 
-/* Ivory face plate — large fill so art can go bold edge-to-edge */
+/* Bright porcelain face */
 .mahjong-tile .tile-face {
-  width: 92%;
-  height: 92%;
-  border-radius: 4px;
-  border: 1px solid rgba(90, 70, 40, 0.22);
+  width: 90%;
+  height: 90%;
+  border-radius: 9px;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    linear-gradient(165deg, #fffef9 0%, #f7f0e0 42%, #ebe2cc 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -2px 4px rgba(120, 90, 40, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.12);
+  background: transparent;
+  box-shadow: none;
+  position: relative;
+  overflow: visible;
+}
+
+.mahjong-tile .tile-face-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
+  background:
+    radial-gradient(ellipse 90% 70% at 30% 20%, #ffffff 0%, transparent 55%),
+    linear-gradient(165deg, #ffffff 0%, #fbf6ec 48%, #f0e6d4 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 2px rgba(140, 110, 70, 0.1),
+    0 0 0 1px rgba(180, 150, 110, 0.22);
 }
 
 .mahjong-tile .tile-face-sheen {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    125deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.08) 28%,
-    transparent 48%
+    118deg,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(255, 255, 255, 0.15) 22%,
+    transparent 42%
   );
   pointer-events: none;
   z-index: 1;
+  border-radius: inherit;
 }
 
 .mahjong-tile .tile-pattern,
@@ -516,77 +541,92 @@
   display: none;
 }
 
-/* Free tiles feel slightly elevated */
+/* Free tiles — soft lift + glow (Vita “available” feel) */
 .mahjong-tile.free {
-  filter: saturate(1.08) brightness(1.02);
+  filter: saturate(1.12) brightness(1.04);
 }
 
 .mahjong-tile.free:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
   box-shadow:
-    1px 2px 0 #0a1a12,
-    2px 3px 6px rgba(0, 0, 0, 0.4);
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    1px 2px 0 #a89478,
+    2px 4px 8px rgba(30, 20, 10, 0.3);
 }
 
 .mahjong-tile.blocked {
-  filter: brightness(0.78) saturate(0.72) contrast(0.95);
+  filter: brightness(0.82) saturate(0.78) contrast(0.96);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    1px 2px 0 #9a8a74,
+    2px 4px 8px rgba(30, 20, 10, 0.28);
 }
 
 .mahjong-tile.selected {
-  outline: 3px solid var(--gold);
-  outline-offset: 2px;
-  transform: translateY(-4px) scale(1.04);
+  outline: none;
+  transform: translateY(-5px) scale(1.06);
   box-shadow:
-    3px 8px 0 #0a1a12,
-    0 0 20px rgba(232, 184, 74, 0.65),
-    4px 10px 18px rgba(0, 0, 0, 0.4);
+    0 0 0 3px #fff,
+    0 0 0 6px rgba(255, 196, 72, 0.95),
+    0 0 24px rgba(255, 200, 80, 0.55),
+    3px 10px 0 #a89478,
+    5px 14px 20px rgba(30, 20, 10, 0.4);
   z-index: 500 !important;
-  filter: saturate(1.15) brightness(1.06);
+  filter: saturate(1.18) brightness(1.08);
 }
 
 .mahjong-tile.hinted {
-  outline: 3px solid var(--jade-bright);
-  outline-offset: 2px;
-  animation: hintPulse 1s ease infinite;
+  outline: none;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 6px rgba(72, 210, 140, 0.95),
+    0 0 22px rgba(72, 210, 140, 0.5),
+    2px 4px 0 #a89478,
+    3px 6px 12px rgba(30, 20, 10, 0.3);
+  animation: hintPulse 1.1s ease infinite;
   z-index: 400 !important;
 }
 
-/* Face glyphs — oversized to fill the ivory face */
+/* Face glyphs */
 .tile-symbol {
-  font-size: clamp(1.35rem, 7.5vw, 2.1rem);
+  font-size: clamp(1.4rem, 7.8vw, 2.2rem);
   font-weight: 900;
   line-height: 0.9;
-  font-family: 'Songti SC', 'STSong', 'Noto Serif SC', 'Hiragino Mincho ProN', serif;
+  font-family: 'Songti SC', 'STSong', 'Noto Serif SC', 'Hiragino Mincho ProN', 'PingFang SC', serif;
+  -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.08);
   text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.35),
-    0 1px 2px rgba(0, 0, 0, 0.12);
+    0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 3px rgba(0, 0, 0, 0.08);
 }
 
 .tile-symbol.honor {
-  font-size: clamp(1.85rem, 9.5vw, 2.65rem);
+  font-size: clamp(2rem, 10.5vw, 2.85rem);
   font-weight: 900;
-  letter-spacing: -0.03em;
-  transform: scale(1.05);
+  letter-spacing: -0.04em;
+}
+
+.tile-symbol.honor-wind {
+  font-size: clamp(1.9rem, 10vw, 2.7rem);
 }
 
 .tile-symbol.honor-red {
-  color: #c8102e !important;
+  color: #e01830 !important;
   text-shadow:
-    0 0 1px #8b0000,
-    0 1px 0 rgba(255, 255, 255, 0.25),
-    0 2px 3px rgba(160, 0, 0, 0.2);
+    0 0 0.5px #8b0010,
+    0 1px 0 rgba(255, 255, 255, 0.4),
+    0 2px 4px rgba(180, 0, 30, 0.18);
 }
 
 .tile-symbol.honor-green {
-  color: #0d8a45 !important;
+  color: #12a050 !important;
   text-shadow:
-    0 0 1px #064d26,
-    0 1px 0 rgba(255, 255, 255, 0.3),
-    0 2px 3px rgba(0, 80, 40, 0.2);
+    0 0 0.5px #064d26,
+    0 1px 0 rgba(255, 255, 255, 0.4),
+    0 2px 4px rgba(0, 100, 50, 0.16);
 }
 
 .tile-symbol.honor-special {
-  font-size: clamp(1.65rem, 8.5vw, 2.35rem);
+  font-size: clamp(1.7rem, 9vw, 2.45rem);
 }
 
 .tile-char-stack {
@@ -594,32 +634,31 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  line-height: 0.88;
-  width: 96%;
-  height: 96%;
-  transform: scale(1.08);
+  gap: 1px;
+  line-height: 0.86;
+  width: 100%;
+  height: 100%;
 }
 
 .tile-char-stack .char-num {
-  font-size: clamp(1.15rem, 6vw, 1.7rem);
+  font-size: clamp(1.25rem, 6.5vw, 1.85rem);
   font-weight: 900;
-  color: #c8102e;
+  color: #e01830;
   font-family: 'Songti SC', 'STSong', 'Noto Serif SC', 'Hiragino Mincho ProN', serif;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .tile-char-label {
-  font-size: clamp(1.05rem, 5.5vw, 1.55rem);
+  font-size: clamp(1.15rem, 6vw, 1.7rem);
   font-weight: 900;
-  color: #c8102e;
+  color: #e01830;
   font-family: 'Songti SC', 'STSong', 'Noto Serif SC', 'Hiragino Mincho ProN', serif;
   letter-spacing: 0.02em;
 }
 
 .tile-pattern {
-  width: 96%;
-  height: 96%;
+  width: 94%;
+  height: 94%;
   overflow: visible;
 }
 
@@ -627,21 +666,25 @@
   width: 72%;
   height: 78%;
   border: 4.5px solid #2a2a32;
-  border-radius: 3px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 
 @keyframes hintPulse {
   0%,
   100% {
     box-shadow:
-      3px 4px 0 #0a1a12,
-      0 0 10px rgba(61, 184, 122, 0.55);
+      0 0 0 3px #fff,
+      0 0 0 6px rgba(72, 210, 140, 0.85),
+      0 0 14px rgba(72, 210, 140, 0.4),
+      2px 4px 0 #a89478;
   }
   50% {
     box-shadow:
-      3px 4px 0 #0a1a12,
-      0 0 22px rgba(61, 184, 122, 0.9);
+      0 0 0 3px #fff,
+      0 0 0 7px rgba(72, 210, 140, 1),
+      0 0 28px rgba(72, 210, 140, 0.65),
+      2px 4px 0 #a89478;
   }
 }
 
@@ -726,8 +769,13 @@
   z-index: 1 !important;
   pointer-events: none;
   cursor: default;
-  /* Keep premium look at small size */
-  border-radius: 7px;
+  border-radius: 10px;
+}
+
+.storage-slot-empty {
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 2px dashed rgba(255, 220, 160, 0.22) !important;
 }
 
 .storage-tile-static {
