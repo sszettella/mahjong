@@ -1,0 +1,122 @@
+import { useEffect, useState } from 'react'
+import type { Progress } from '../types'
+import { totalStars } from '../storage'
+
+interface Props {
+  progress: Progress
+  onPlay: () => void
+  onLevels: () => void
+  onHowTo: () => void
+}
+
+function isStandalone(): boolean {
+  if (typeof window === 'undefined') return false
+  const nav = window.navigator as Navigator & { standalone?: boolean }
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    nav.standalone === true
+  )
+}
+
+export function HomeScreen({ progress, onPlay, onLevels, onHowTo }: Props) {
+  const completed = progress.completedLevels.length
+  const stars = totalStars(progress)
+  const continueLevel = Math.min(100, progress.unlockedLevel)
+  const [online, setOnline] = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true,
+  )
+  const [installed, setInstalled] = useState(false)
+  const [showInstallHelp, setShowInstallHelp] = useState(false)
+
+  useEffect(() => {
+    setInstalled(isStandalone())
+    const on = () => setOnline(true)
+    const off = () => setOnline(false)
+    window.addEventListener('online', on)
+    window.addEventListener('offline', off)
+    return () => {
+      window.removeEventListener('online', on)
+      window.removeEventListener('offline', off)
+    }
+  }, [])
+
+  return (
+    <div className="screen home-screen">
+      <div className="home-hero">
+        <div className="home-ornament" aria-hidden>
+          <span>🀄</span>
+        </div>
+        <h1 className="home-title">Mahjong</h1>
+        <p className="home-subtitle">Solitaire · 100 Levels · No Ads</p>
+      </div>
+
+      <div className="status-row">
+        <span className={`status-chip ${online ? 'online' : 'offline'}`}>
+          {online ? 'Online' : 'Offline · ready'}
+        </span>
+        {installed && <span className="status-chip installed">Home Screen</span>}
+      </div>
+
+      <div className="home-stats">
+        <div className="stat-pill">
+          <span className="stat-value">{completed}</span>
+          <span className="stat-label">Cleared</span>
+        </div>
+        <div className="stat-pill">
+          <span className="stat-value">{stars}</span>
+          <span className="stat-label">Stars</span>
+        </div>
+        <div className="stat-pill">
+          <span className="stat-value">{continueLevel}</span>
+          <span className="stat-label">Level</span>
+        </div>
+      </div>
+
+      <div className="home-actions">
+        <button type="button" className="btn btn-primary btn-lg" onClick={onPlay}>
+          {completed === 0 ? 'Start Level 1' : `Continue · Level ${continueLevel}`}
+        </button>
+        <button type="button" className="btn btn-secondary" onClick={onLevels}>
+          All Levels
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={onHowTo}>
+          How to Play
+        </button>
+        {!installed && (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setShowInstallHelp((v) => !v)}
+          >
+            Install for Offline
+          </button>
+        )}
+      </div>
+
+      {showInstallHelp && !installed && (
+        <div className="install-help">
+          <h3>Play anywhere, even offline</h3>
+          <ol>
+            <li>
+              Open this site in <strong>Safari</strong> on your iPhone
+            </li>
+            <li>
+              Tap the <strong>Share</strong> button
+            </li>
+            <li>
+              Tap <strong>Add to Home Screen</strong>
+            </li>
+            <li>
+              Open <strong>Mahjong</strong> from your home screen — works offline after this visit
+            </li>
+          </ol>
+          <p className="install-note">
+            The first open downloads the game to your phone. After that you don’t need Wi‑Fi.
+          </p>
+        </div>
+      )}
+
+      <p className="home-footer">Free forever · Progress saved on this device · No ads</p>
+    </div>
+  )
+}

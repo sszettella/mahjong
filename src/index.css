@@ -1,0 +1,71 @@
+:root {
+  --bg: #1a0f0a;
+  --bg-elevated: #2a1810;
+  --bg-card: #3d2418;
+  --surface: #4a2c1a;
+  --gold: #e8b84a;
+  --gold-dim: #c49a3c;
+  --cream: #f5e6c8;
+  --cream-dim: #d4c4a8;
+  --jade: #2d8a5e;
+  --jade-bright: #3db87a;
+  --crimson: #c0392b;
+  --tile-face: #f7f0e0;
+  --tile-border: #c9b896;
+  --tile-shadow: #1a1008;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --font: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius: 14px;
+  --touch: 44px;
+  color-scheme: dark;
+  font-family: var(--font);
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--cream);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, #4a2818 0%, transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, #1a3020 0%, transparent 45%),
+    var(--bg);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
