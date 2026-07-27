@@ -732,13 +732,14 @@
   }
 }
 
-/* —— Storage rack (Vita-style 4 slots) —— */
+/* —— Storage rack (above board) —— */
 .storage-rack {
   flex-shrink: 0;
-  padding: 6px 14px 4px;
+  padding: 4px 14px 10px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  background: linear-gradient(180deg, rgba(20, 55, 42, 0.35), transparent);
 }
 
 .storage-label {
@@ -1201,40 +1202,108 @@
   color: var(--gold);
 }
 
-/* —— Toolbar —— */
+/* —— Toolbar (tile-styled control chips) —— */
 .game-toolbar {
   display: flex;
-  gap: 6px;
-  padding: 8px 12px calc(12px + var(--safe-bottom));
+  gap: 10px;
+  padding: 10px 14px calc(14px + var(--safe-bottom));
   flex-shrink: 0;
-  background: linear-gradient(180deg, transparent, rgba(8, 35, 28, 0.55));
+  background: linear-gradient(180deg, transparent 0%, rgba(8, 35, 28, 0.4) 40%);
 }
 
 .tool-btn {
   flex: 1;
-  min-height: 52px;
+  min-height: 58px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(180, 240, 200, 0.18);
+  padding: 6px 4px 8px;
+  /* Same bone extrusion language as mahjong tiles */
+  background:
+    linear-gradient(160deg, #efe6d4 0%, #d8cbb4 45%, #c4b49a 100%);
+  border: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 -2px 0 rgba(90, 70, 45, 0.12) inset,
+    2px 3px 0 #a89478,
+    3px 5px 0 #8a7660,
+    3px 7px 12px rgba(20, 40, 30, 0.35);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--cream-dim);
-  transition: background 0.12s;
-  backdrop-filter: blur(8px);
+  gap: 3px;
+  color: #3a2e22;
+  transition:
+    transform 0.12s cubic-bezier(0.34, 1.2, 0.64, 1),
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+  position: relative;
 }
 
-.tool-btn span {
-  font-size: 1.15rem;
+/* Porcelain face inset */
+.tool-btn::before {
+  content: '';
+  position: absolute;
+  inset: 4px 5px 5px;
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse 90% 70% at 30% 20%, #ffffff 0%, transparent 55%),
+    linear-gradient(165deg, #ffffff 0%, #fbf6ec 48%, #f0e6d4 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 2px rgba(140, 110, 70, 0.1),
+    0 0 0 1px rgba(180, 150, 110, 0.2);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tool-btn .tool-icon,
+.tool-btn .tool-label {
+  position: relative;
+  z-index: 1;
+}
+
+.tool-btn .tool-icon {
+  font-size: 1.25rem;
   line-height: 1;
+  font-weight: 700;
+  color: #1f6b4a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.tool-btn .tool-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5a4a38;
 }
 
 .tool-btn:active:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(2px) scale(0.97);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    1px 2px 0 #a89478,
+    2px 3px 8px rgba(20, 40, 30, 0.3);
+}
+
+.tool-btn:disabled {
+  opacity: 0.42;
+  filter: grayscale(0.25) brightness(0.95);
+}
+
+/* Hint accent — gold glyph */
+.tool-btn:nth-child(2) .tool-icon {
+  color: #c49a20;
+}
+
+/* Shuffle accent — teal */
+.tool-btn:nth-child(3) .tool-icon {
+  color: #1a7a9a;
+}
+
+/* Restart accent — warm red-brown */
+.tool-btn:nth-child(4) .tool-icon {
+  color: #b84a3a;
 }
 
 /* —— Modal —— */

@@ -296,20 +296,20 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
         </div>
       </header>
 
-      <Board
-        board={displayBoard}
-        selectedId={flashId}
-        hintIds={hintIds}
-        matchingIds={matchingIds}
-        onSelect={handleSelectBoard}
-      />
-
       <StorageRack
         storage={storage}
         hintIds={hintIds}
         matchingIds={matchingIds}
         parkFlashId={parkFlashId}
         failed={showFail}
+      />
+
+      <Board
+        board={displayBoard}
+        selectedId={flashId}
+        hintIds={hintIds}
+        matchingIds={matchingIds}
+        onSelect={handleSelectBoard}
       />
 
       <MatchBurst burst={matchBurst} onDone={handleBurstDone} />
@@ -321,8 +321,10 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
           onClick={handleUndo}
           disabled={history.length === 0 || animating}
         >
-          <span>↩</span>
-          Undo
+          <span className="tool-icon" aria-hidden>
+            ↩
+          </span>
+          <span className="tool-label">Undo</span>
         </button>
         <button
           type="button"
@@ -330,8 +332,10 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
           onClick={handleHint}
           disabled={showFail || showWin || animating}
         >
-          <span>💡</span>
-          Hint
+          <span className="tool-icon" aria-hidden>
+            ✦
+          </span>
+          <span className="tool-label">Hint</span>
         </button>
         <button
           type="button"
@@ -339,12 +343,16 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
           onClick={handleShuffle}
           disabled={showFail || showWin || animating}
         >
-          <span>🔀</span>
-          Shuffle
+          <span className="tool-icon" aria-hidden>
+            ↻
+          </span>
+          <span className="tool-label">Shuffle</span>
         </button>
         <button type="button" className="tool-btn" onClick={handleRestart}>
-          <span>↻</span>
-          Restart
+          <span className="tool-icon" aria-hidden>
+            ✹
+          </span>
+          <span className="tool-label">Restart</span>
         </button>
       </footer>
 
