@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { BoardTile } from '../types'
-import { boardBounds, isTileFree } from '../gameLogic'
+import { boardBounds, isCoveredByStack, isTileFree } from '../gameLogic'
 import { TileView } from './TileView'
 
 interface Props {
@@ -20,17 +20,20 @@ export function Board({ board, selectedId, hintIds, matchingIds = [], onSelect }
   const tileW = useMemo(() => {
     const vw = typeof window !== 'undefined' ? window.innerWidth : 390
     const available = Math.min(vw - 24, 440)
-    const raw = available / (cols + 0.5 + maxZ * 0.15)
+    const raw = available / (cols + 0.5 + maxZ * 0.2)
     return Math.max(28, Math.min(52, raw))
   }, [cols, maxZ])
 
   const tileH = tileW * 1.28
-  const gapX = tileW * 0.92
-  const gapY = tileH * 0.88
-  const pad = 12 + maxZ * 4
+  // Slight gap so neighbors don't overlap faces (was 0.92 — caused bleed)
+  const gapX = tileW * 1.02
+  const gapY = tileH * 1.0
+  // Stack offset: peek a clear rim of lower tiles without face bleed
+  const layerShift = Math.max(4, Math.round(tileW * 0.12))
+  const pad = 12 + maxZ * layerShift
 
-  const width = cols * gapX + pad * 2 + maxZ * 4
-  const height = rows * gapY + pad * 2 + maxZ * 4
+  const width = cols * gapX + pad * 2 + maxZ * layerShift
+  const height = rows * gapY + pad * 2 + maxZ * layerShift
 
   const freeSet = useMemo(() => {
     const s = new Set<string>()
@@ -40,8 +43,17 @@ export function Board({ board, selectedId, hintIds, matchingIds = [], onSelect }
     return s
   }, [board])
 
+  const buriedSet = useMemo(() => {
+    const s = new Set<string>()
+    for (const t of board) {
+      if (!t.removed && isCoveredByStack(t, board)) s.add(t.id)
+    }
+    return s
+  }, [board])
+
   const matchSet = useMemo(() => new Set(matchingIds), [matchingIds])
 
+  // Paint bottom layers first; z-index still enforces top-on-top
   const sorted = useMemo(
     () =>
       [...board]
@@ -56,11 +68,13 @@ export function Board({ board, selectedId, hintIds, matchingIds = [], onSelect }
         {sorted.map((tile) => {
           const px = pad + (tile.x - minX) * gapX
           const py = pad + (tile.y - minY) * gapY
+          const depthPx = tile.z * layerShift
           return (
             <TileView
               key={tile.id}
               tile={tile}
               free={freeSet.has(tile.id) && !matchSet.has(tile.id)}
+              buried={buriedSet.has(tile.id) && !matchSet.has(tile.id)}
               selected={selectedId === tile.id}
               hinted={hintIds.includes(tile.id)}
               matching={matchSet.has(tile.id)}
@@ -68,6 +82,7 @@ export function Board({ board, selectedId, hintIds, matchingIds = [], onSelect }
               pixelY={py}
               tileW={tileW}
               tileH={tileH}
+              depthPx={depthPx}
               onSelect={onSelect}
             />
           )

@@ -5,11 +5,19 @@ import { facesMatch } from './tiles'
 const EPS = 0.45 // half-tile overlap threshold for adjacency / covering
 
 /** Bounding box overlap in x/y for "same stack" covering. */
-function covers(upper: BoardTile, lower: BoardTile): boolean {
+export function covers(upper: BoardTile, lower: BoardTile): boolean {
   if (upper.z <= lower.z) return false
   return (
     Math.abs(upper.x - lower.x) < EPS &&
     Math.abs(upper.y - lower.y) < EPS
+  )
+}
+
+/** True if any active tile sits on top of this one. */
+export function isCoveredByStack(tile: BoardTile, board: BoardTile[]): boolean {
+  if (tile.removed) return false
+  return board.some(
+    (other) => !other.removed && other.id !== tile.id && covers(other, tile),
   )
 }
 
