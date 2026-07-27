@@ -31,19 +31,21 @@ function DotsPattern({ n }: { n: number; color: string }) {
   // Classic: 1,5,7,9 red · 2,3,4,6,8 blue
   const useTone: 'red' | 'blue' = [1, 5, 7, 9].includes(n) ? 'red' : 'blue'
 
+  // Positions pushed toward edges so the face reads fuller
   const positions: Record<number, [number, number][]> = {
     1: [[50, 50]],
-    2: [[50, 28], [50, 72]],
-    3: [[50, 22], [50, 50], [50, 78]],
-    4: [[30, 28], [70, 28], [30, 72], [70, 72]],
-    5: [[30, 28], [70, 28], [50, 50], [30, 72], [70, 72]],
-    6: [[30, 22], [70, 22], [30, 50], [70, 50], [30, 78], [70, 78]],
-    7: [[30, 18], [70, 18], [50, 36], [30, 54], [70, 54], [30, 80], [70, 80]],
-    8: [[30, 16], [70, 16], [30, 38], [70, 38], [30, 62], [70, 62], [30, 84], [70, 84]],
-    9: [[26, 18], [50, 18], [74, 18], [26, 50], [50, 50], [74, 50], [26, 82], [50, 82], [74, 82]],
+    2: [[50, 24], [50, 76]],
+    3: [[50, 18], [50, 50], [50, 82]],
+    4: [[26, 24], [74, 24], [26, 76], [74, 76]],
+    5: [[26, 24], [74, 24], [50, 50], [26, 76], [74, 76]],
+    6: [[26, 18], [74, 18], [26, 50], [74, 50], [26, 82], [74, 82]],
+    7: [[26, 14], [74, 14], [50, 34], [26, 52], [74, 52], [26, 86], [74, 86]],
+    8: [[26, 12], [74, 12], [26, 36], [74, 36], [26, 64], [74, 64], [26, 88], [74, 88]],
+    9: [[22, 14], [50, 14], [78, 14], [22, 50], [50, 50], [78, 50], [22, 86], [50, 86], [78, 86]],
   }
   const pts = positions[n] ?? positions[1]
-  const r = n >= 8 ? 8.5 : n >= 6 ? 9.5 : n === 1 ? 16 : 11
+  // Larger gems — bold fill of the face
+  const r = n >= 8 ? 11 : n >= 6 ? 12.5 : n === 1 ? 22 : n <= 3 ? 15 : 13.5
 
   return (
     <svg className="tile-pattern" viewBox="0 0 100 100" aria-hidden>
@@ -77,15 +79,15 @@ function BambooStick({
   y1: number
   thin?: boolean
 }) {
-  const w = thin ? 5.5 : 7.5
+  const w = thin ? 8 : 11
   return (
     <g>
       {/* shadow */}
       <line
-        x1={x + 1}
-        y1={y0 + 1}
-        x2={x + 1}
-        y2={y1 + 1}
+        x1={x + 1.2}
+        y1={y0 + 1.2}
+        x2={x + 1.2}
+        y2={y1 + 1.2}
         stroke="rgba(0,0,0,0.15)"
         strokeWidth={w}
         strokeLinecap="round"
@@ -100,9 +102,9 @@ function BambooStick({
         strokeLinecap="round"
       />
       {/* joint nodes */}
-      <ellipse cx={x} cy={(y0 + y1) / 2} rx={w * 0.85} ry={2.2} fill="#0d5c32" />
-      <ellipse cx={x} cy={y0 + (y1 - y0) * 0.28} rx={w * 0.7} ry={1.6} fill="#1a7a45" opacity={0.9} />
-      <ellipse cx={x} cy={y0 + (y1 - y0) * 0.72} rx={w * 0.7} ry={1.6} fill="#1a7a45" opacity={0.9} />
+      <ellipse cx={x} cy={(y0 + y1) / 2} rx={w * 0.9} ry={2.8} fill="#0d5c32" />
+      <ellipse cx={x} cy={y0 + (y1 - y0) * 0.28} rx={w * 0.75} ry={2} fill="#1a7a45" opacity={0.9} />
+      <ellipse cx={x} cy={y0 + (y1 - y0) * 0.72} rx={w * 0.75} ry={2} fill="#1a7a45" opacity={0.9} />
       {/* highlight */}
       <line
         x1={x - w * 0.22}
@@ -110,7 +112,7 @@ function BambooStick({
         x2={x - w * 0.22}
         y2={y1 - 3}
         stroke="rgba(255,255,255,0.35)"
-        strokeWidth={1.4}
+        strokeWidth={1.8}
         strokeLinecap="round"
       />
     </g>
@@ -125,9 +127,9 @@ function BambooPattern({ n }: { n: number; color: string }) {
   for (let r = 0; r < rows; r++) {
     const inRow = Math.min(cols, left)
     for (let c = 0; c < inRow; c++) {
-      const x = 50 + (c - (inRow - 1) / 2) * 22
-      const y0 = 14 + r * (68 / rows)
-      const y1 = y0 + 52 / rows
+      const x = 50 + (c - (inRow - 1) / 2) * 26
+      const y0 = 8 + r * (78 / rows)
+      const y1 = y0 + 66 / rows
       sticks.push({ x, y0, y1 })
     }
     left -= inRow
@@ -157,21 +159,21 @@ function BambooBird() {
           <stop offset="100%" stopColor="#0f6b38" />
         </linearGradient>
       </defs>
-      {/* stylized peacock / bird mark */}
-      <ellipse cx={50} cy={58} rx={18} ry={22} fill="url(#birdGrad)" />
-      <ellipse cx={50} cy={38} rx={12} ry={14} fill="#1a8f4a" />
-      <circle cx={46} cy={35} r={2.2} fill="#0a2e18" />
+      {/* scaled-up peacock / bird mark fills the face */}
+      <ellipse cx={50} cy={58} rx={24} ry={28} fill="url(#birdGrad)" />
+      <ellipse cx={50} cy={34} rx={16} ry={18} fill="#1a8f4a" />
+      <circle cx={44} cy={31} r={3} fill="#0a2e18" />
       <path
-        d="M50 20 C58 8, 72 12, 74 26 C62 22, 54 24, 50 32 Z"
+        d="M50 14 C62 0, 82 6, 84 24 C68 18, 56 22, 50 32 Z"
         fill="#2db86a"
       />
       <path
-        d="M50 20 C42 8, 28 12, 26 26 C38 22, 46 24, 50 32 Z"
+        d="M50 14 C38 0, 18 6, 16 24 C32 18, 44 22, 50 32 Z"
         fill="#1f9a52"
       />
-      <path d="M62 62 Q78 70 70 82 Q60 72 58 66 Z" fill="#0f6b38" />
-      <path d="M38 62 Q22 70 30 82 Q40 72 42 66 Z" fill="#0f6b38" />
-      <circle cx={72} cy={28} r={3} fill="#e11d2e" />
+      <path d="M66 64 Q88 74 78 92 Q64 78 62 70 Z" fill="#0f6b38" />
+      <path d="M34 64 Q12 74 22 92 Q36 78 38 70 Z" fill="#0f6b38" />
+      <circle cx={78} cy={24} r={4.5} fill="#e11d2e" />
     </svg>
   )
 }
@@ -196,24 +198,24 @@ function WhiteDragon() {
         </linearGradient>
       </defs>
       <rect
-        x={18}
-        y={16}
-        width={64}
-        height={68}
-        rx={4}
+        x={10}
+        y={8}
+        width={80}
+        height={84}
+        rx={5}
         fill="none"
         stroke="url(#wdFrame)"
-        strokeWidth={7}
+        strokeWidth={9}
       />
       <rect
-        x={26}
-        y={24}
-        width={48}
-        height={52}
+        x={20}
+        y={18}
+        width={60}
+        height={64}
         rx={2}
         fill="none"
         stroke="rgba(0,0,0,0.12)"
-        strokeWidth={2}
+        strokeWidth={2.5}
       />
     </svg>
   )
