@@ -1,18 +1,22 @@
 :root {
-  --bg: #1a0f0a;
-  --bg-elevated: #2a1810;
-  --bg-card: #3d2418;
-  --surface: #4a2c1a;
-  --gold: #e8b84a;
-  --gold-dim: #c49a3c;
-  --cream: #f5e6c8;
-  --cream-dim: #d4c4a8;
-  --jade: #2d8a5e;
-  --jade-bright: #3db87a;
-  --crimson: #c0392b;
-  --tile-face: #f7f0e0;
+  /* Vita-inspired soft green palette */
+  --bg: #1a3d32;
+  --bg-deep: #0f2a22;
+  --bg-elevated: #245a48;
+  --bg-card: #2d6b56;
+  --surface: #348565;
+  --gold: #f0d06a;
+  --gold-dim: #d4b04a;
+  --cream: #f7f4ea;
+  --cream-dim: #d8e6dc;
+  --jade: #3dba7a;
+  --jade-bright: #5eeb9a;
+  --jade-soft: #7ed9a8;
+  --mint: #b8f0d0;
+  --crimson: #e05050;
+  --tile-face: #fbf8f0;
   --tile-border: #c9b896;
-  --tile-shadow: #1a1008;
+  --tile-shadow: #1a3028;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --font: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -23,7 +27,7 @@
   line-height: 1.45;
   font-weight: 400;
   color: var(--cream);
-  background: var(--bg);
+  background: var(--bg-deep);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -51,12 +55,52 @@ body,
 body {
   margin: 0;
   min-width: 320px;
-  /* Soft “zen table” — closer to polished mobile mahjong apps */
+  position: relative;
+  /* Soft stylized green field — Vita-like serene table */
   background:
-    radial-gradient(ellipse 100% 70% at 50% 0%, rgba(255, 210, 140, 0.14) 0%, transparent 50%),
-    radial-gradient(ellipse 80% 55% at 80% 100%, rgba(60, 140, 110, 0.18) 0%, transparent 50%),
-    radial-gradient(ellipse 70% 50% at 10% 80%, rgba(120, 80, 160, 0.1) 0%, transparent 45%),
-    linear-gradient(165deg, #2a1c14 0%, #1a140f 40%, #121a18 100%);
+    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(180, 255, 210, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 15% 75%, rgba(90, 200, 150, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 35% at 90% 60%, rgba(60, 160, 130, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(20, 60, 48, 0.65) 0%, transparent 55%),
+    linear-gradient(165deg, #2f6b55 0%, #1f5242 38%, #163d32 72%, #0f2a22 100%);
+}
+
+/* Decorative soft orbs / “leaves” floating in the green */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(2px);
+}
+
+body::before {
+  width: min(70vw, 320px);
+  height: min(70vw, 320px);
+  top: -8%;
+  right: -12%;
+  background:
+    radial-gradient(circle at 40% 40%, rgba(160, 240, 190, 0.35), transparent 62%),
+    radial-gradient(circle at 70% 60%, rgba(80, 180, 130, 0.25), transparent 55%);
+  opacity: 0.9;
+}
+
+body::after {
+  width: min(85vw, 380px);
+  height: min(85vw, 380px);
+  bottom: -18%;
+  left: -20%;
+  background:
+    radial-gradient(circle at 55% 45%, rgba(120, 210, 160, 0.28), transparent 60%),
+    radial-gradient(circle at 30% 70%, rgba(40, 120, 90, 0.35), transparent 50%);
+  opacity: 0.85;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
 }
 
 button {

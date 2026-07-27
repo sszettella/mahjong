@@ -7,6 +7,9 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  /* Soft vignette so content sits on a “table” */
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 30%, transparent 40%, rgba(8, 28, 22, 0.35) 100%);
 }
 
 .screen {
@@ -63,14 +66,14 @@
   width: 88px;
   height: 88px;
   border-radius: 22px;
-  background: linear-gradient(145deg, #5c3a24, #2a1810);
-  border: 2px solid var(--gold-dim);
+  background: linear-gradient(145deg, #3d8f6e, #1f5a44);
+  border: 2px solid rgba(240, 208, 106, 0.55);
   display: grid;
   place-items: center;
   font-size: 48px;
   box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 220, 150, 0.2);
+    0 12px 32px rgba(10, 40, 30, 0.4),
+    inset 0 1px 0 rgba(200, 255, 220, 0.25);
   margin-bottom: 8px;
 }
 
@@ -101,13 +104,14 @@
 
 .stat-pill {
   flex: 1;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(232, 184, 74, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(180, 240, 200, 0.22);
   border-radius: 12px;
   padding: 12px 8px;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  backdrop-filter: blur(8px);
 }
 
 .stat-value {
@@ -150,9 +154,10 @@
   letter-spacing: 0.08em;
   padding: 4px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(180, 240, 200, 0.22);
   color: var(--cream-dim);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(12, 45, 35, 0.35);
+  backdrop-filter: blur(6px);
 }
 
 .status-chip.online {
@@ -174,11 +179,12 @@
   width: 100%;
   max-width: 340px;
   text-align: left;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(232, 184, 74, 0.28);
+  background: rgba(12, 45, 35, 0.55);
+  border: 1px solid rgba(180, 240, 200, 0.28);
   border-radius: 14px;
   padding: 14px 16px;
   animation: fadeIn 0.25s ease;
+  backdrop-filter: blur(10px);
 }
 
 .install-help h3 {
@@ -244,9 +250,10 @@
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(232, 184, 74, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(180, 240, 200, 0.35);
   color: var(--cream);
+  backdrop-filter: blur(6px);
 }
 
 .btn-ghost {
@@ -307,8 +314,8 @@
 .level-card {
   aspect-ratio: 1;
   border-radius: 14px;
-  background: linear-gradient(160deg, var(--bg-card), var(--bg-elevated));
-  border: 1px solid rgba(232, 184, 74, 0.18);
+  background: linear-gradient(160deg, rgba(55, 130, 100, 0.75), rgba(28, 75, 58, 0.85));
+  border: 1px solid rgba(180, 240, 200, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -316,6 +323,7 @@
   gap: 4px;
   padding: 8px 4px;
   transition: transform 0.12s, border-color 0.15s;
+  backdrop-filter: blur(6px);
 }
 
 .level-card:active:not(:disabled) {
@@ -440,21 +448,39 @@
   align-items: center;
   justify-content: center;
   padding: 8px 10px;
+  position: relative;
+}
+
+/* Soft decorative leaf spots behind the board */
+.board-scroll::before {
+  content: '';
+  position: absolute;
+  inset: 8% 6%;
+  border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%;
+  background:
+    radial-gradient(ellipse 60% 50% at 30% 40%, rgba(140, 230, 180, 0.18), transparent 70%),
+    radial-gradient(ellipse 50% 45% at 75% 65%, rgba(80, 180, 130, 0.14), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .board {
   position: relative;
   margin: auto;
   flex-shrink: 0;
-  /* Soft felt pad under the layout */
-  padding: 10px;
-  border-radius: 18px;
+  z-index: 1;
+  /* Plush green felt pad — classic mobile mahjong table */
+  padding: 14px 12px;
+  border-radius: 22px;
   background:
-    radial-gradient(ellipse 80% 70% at 50% 40%, rgba(80, 140, 100, 0.22), transparent 70%),
-    linear-gradient(180deg, rgba(40, 55, 48, 0.45), rgba(20, 28, 24, 0.55));
+    radial-gradient(ellipse 90% 75% at 50% 35%, rgba(120, 210, 160, 0.28), transparent 65%),
+    radial-gradient(ellipse 70% 60% at 50% 80%, rgba(20, 70, 50, 0.35), transparent 70%),
+    linear-gradient(165deg, #2a7a5c 0%, #1f6149 45%, #184a38 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 8px 28px rgba(0, 0, 0, 0.35);
+    inset 0 2px 0 rgba(200, 255, 220, 0.18),
+    inset 0 -3px 8px rgba(0, 40, 25, 0.35),
+    0 0 0 1px rgba(160, 230, 190, 0.15),
+    0 10px 32px rgba(8, 30, 22, 0.45);
 }
 
 /* —— Tiles (Vita-inspired soft bone / glossy mobile look) —— */
@@ -1181,15 +1207,15 @@
   gap: 6px;
   padding: 8px 12px calc(12px + var(--safe-bottom));
   flex-shrink: 0;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.35));
+  background: linear-gradient(180deg, transparent, rgba(8, 35, 28, 0.55));
 }
 
 .tool-btn {
   flex: 1;
   min-height: 52px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(180, 240, 200, 0.18);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1199,6 +1225,7 @@
   font-weight: 600;
   color: var(--cream-dim);
   transition: background 0.12s;
+  backdrop-filter: blur(8px);
 }
 
 .tool-btn span {
@@ -1214,8 +1241,8 @@
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(10, 6, 4, 0.72);
-  backdrop-filter: blur(6px);
+  background: rgba(8, 32, 26, 0.72);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1225,14 +1252,14 @@
 }
 
 .modal {
-  background: linear-gradient(165deg, #3d2818, #1f120c);
-  border: 1px solid rgba(232, 184, 74, 0.35);
+  background: linear-gradient(165deg, #2d6b56, #1a4034);
+  border: 1px solid rgba(180, 240, 200, 0.3);
   border-radius: 20px;
   padding: 28px 24px;
   width: 100%;
   max-width: 320px;
   text-align: center;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 24px 48px rgba(5, 25, 18, 0.55);
 }
 
 .modal-emoji {
@@ -1271,15 +1298,15 @@
   left: 12px;
   right: 12px;
   bottom: calc(80px + var(--safe-bottom));
-  background: rgba(40, 20, 12, 0.95);
-  border: 1px solid rgba(232, 184, 74, 0.4);
+  background: rgba(20, 55, 42, 0.95);
+  border: 1px solid rgba(180, 240, 200, 0.35);
   border-radius: 14px;
   padding: 12px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
   z-index: 50;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(5, 25, 18, 0.45);
   animation: fadeIn 0.2s ease;
 }
 
