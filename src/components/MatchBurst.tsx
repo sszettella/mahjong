@@ -68,29 +68,30 @@ export function MatchBurst({ burst, onDone }: Props) {
       const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon', 'circle']
       const shape = shapes[Math.floor(r1 * shapes.length)]
 
-      // Full 360° firework spray — even spokes + jitter
-      const angle = (i / PIECE_COUNT) * Math.PI * 2 + (r1 - 0.5) * 0.55
-      const power = 70 + r2 * 160 // explosive reach
+      // Full 360° firework — all pieces share the same origin, fly outward
+      const angle = (i / PIECE_COUNT) * Math.PI * 2 + (r1 - 0.5) * 0.4
+      const power = 90 + r2 * 150
       const burstX = Math.cos(angle) * power
-      const burstY = Math.sin(angle) * power * 0.95 - 12 // slight upward bias
+      const burstY = Math.sin(angle) * power * 0.95 - 10
 
       // After the blast, gravity pulls everything down
-      const fallX = burstX * 1.08 + (r3 - 0.5) * 36
-      const fallY = burstY + 220 + r4 * 280
+      const fallX = burstX * 1.1 + (r3 - 0.5) * 28
+      const fallY = burstY + 240 + r4 * 260
 
       return {
         i,
         color: COLORS[Math.floor(r6 * COLORS.length)],
         shape,
-        originX: ox + (r1 - 0.5) * 6,
-        originY: oy + (r2 - 0.5) * 6,
+        // Exact match-tile center — no scatter at spawn
+        originX: ox,
+        originY: oy,
         burstX,
         burstY,
         fallX,
         fallY,
-        // Near-simultaneous bang (tiny stagger only)
-        delay: r1 * 0.04 + (i % 4) * 0.008,
-        duration: 1.15 + r2 * 0.45,
+        // Essentially simultaneous so the blast reads as one explosion
+        delay: r1 * 0.02,
+        duration: 1.2 + r2 * 0.4,
         rot0: r3 * 360,
         spinAmt: 280 + r4 * 640,
         w: shape === 'ribbon' ? 3 + r5 * 4 : shape === 'circle' ? 5 + r5 * 6 : 5 + r5 * 7,

@@ -1056,26 +1056,39 @@
 }
 
 /*
- * Firework: explode outward fast (ease-out), then fall (ease-in).
- * Per-keyframe timing-function keeps the whole path smooth — no hangs.
+ * Firework from a tight center:
+ * - hold at origin briefly (reads as a spark)
+ * - accelerate outward (ease-in, NOT ease-out — ease-out looked pre-exploded)
+ * - then gravity fall
  */
 @keyframes confettiFirework {
   0% {
-    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.25);
-    animation-timing-function: cubic-bezier(0.12, 0.75, 0.28, 1);
+    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.15);
+    animation-timing-function: cubic-bezier(0.55, 0.0, 0.75, 0.45);
   }
-  /* Blast peak — pieces fly outward in all directions */
-  22% {
+  /* Still near the center — birth of the blast */
+  8% {
+    transform: translate3d(
+        calc(var(--burst-x) * 0.06),
+        calc(var(--burst-y) * 0.06),
+        0
+      )
+      rotate(calc(var(--rot0) + var(--spin-amt) * 0.05 * var(--spin, 1)))
+      scale(0.55);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  /* Peak of the explosion */
+  32% {
     transform: translate3d(var(--burst-x), var(--burst-y), 0)
-      rotate(calc(var(--rot0) + var(--spin-amt) * 0.35 * var(--spin, 1)))
-      scale(1.15);
-    animation-timing-function: cubic-bezier(0.4, 0, 0.75, 0.25);
+      rotate(calc(var(--rot0) + var(--spin-amt) * 0.4 * var(--spin, 1)))
+      scale(1.12);
+    animation-timing-function: cubic-bezier(0.45, 0.0, 0.8, 0.25);
   }
-  /* Gravity — accelerate downward past the blast */
+  /* Fall away under gravity */
   100% {
     transform: translate3d(var(--fall-x), var(--fall-y), 0)
       rotate(calc(var(--rot0) + var(--spin-amt) * var(--spin, 1)))
-      scale(0.65);
+      scale(0.6);
   }
 }
 
@@ -1083,10 +1096,10 @@
   0% {
     opacity: 0;
   }
-  4% {
+  3% {
     opacity: 1;
   }
-  70% {
+  55% {
     opacity: 1;
   }
   100% {
