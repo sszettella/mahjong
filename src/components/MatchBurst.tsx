@@ -19,7 +19,7 @@ interface Props {
 }
 
 const PIECE_COUNT = 52
-const BURST_MS = 2600
+const BURST_MS = 2800
 
 /** Chrome / silver metal palette */
 const COLORS = [
@@ -65,46 +65,65 @@ export function MatchBurst({ burst, onDone }: Props) {
       const r4 = seeded(seed + i * 7 + 11)
       const r5 = seeded(seed + i * 11 + 23)
       const r6 = seeded(seed + i * 13 + 41)
+      const r7 = seeded(seed + i * 17 + 59)
 
       const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon', 'circle']
       const shape = shapes[Math.floor(r1 * shapes.length)]
 
-      // Full 360° firework — tighter radius, slower motion
-      const angle = (i / PIECE_COUNT) * Math.PI * 2 + (r1 - 0.5) * 0.35
-      const power = 42 + r2 * 55 // was ~90–240; now ~42–97
-      const burstX = Math.cos(angle) * power
-      const burstY = Math.sin(angle) * power * 0.95 - 6
+      // Random direction with slight upward bias (real confetti pops up more than down)
+      const angle =
+        -Math.PI * 0.5 + // start pointing up
+        (r1 - 0.5) * Math.PI * 1.7 + // fan mostly upper hemisphere + sides
+        (i % 3 === 0 ? Math.PI * (r2 - 0.5) * 0.8 : 0) // some full-circle stragglers
 
-      // After the blast, gravity pulls everything down (gentler drift)
-      const fallX = burstX * 1.05 + (r3 - 0.5) * 18
-      const fallY = burstY + 180 + r4 * 200
+      // Variable “mass” / impulse — lighter pieces go farther
+      const mass = shape === 'ribbon' ? 0.75 : shape === 'circle' ? 0.9 : shape === 'square' ? 1.15 : 1
+      const power = (36 + r2 * 48) / mass
+
+      // Apex of the pop (initial velocity)
+      const burstX = Math.cos(angle) * power
+      const burstY = Math.sin(angle) * power - 8 // extra lift
+
+      // Air drag: horizontal velocity decays; gravity dominates vertical
+      const drag = 0.45 + r3 * 0.25 // keep ~45–70% of horizontal speed by landing
+      const wind = (r4 - 0.5) * 22
+      const fallX = burstX * drag + wind
+      // Always end well below origin; heavier pieces fall faster (less hang)
+      const hang = shape === 'ribbon' ? 0.55 : shape === 'circle' ? 0.4 : 0.28
+      const fallY = Math.max(burstY * hang, -20) + (160 + r5 * 180) * mass
+
+      // Heavier = shorter flight; ribbons drift longer
+      const duration =
+        (shape === 'ribbon' ? 2.0 : shape === 'circle' ? 1.75 : 1.55) + r2 * 0.35
 
       return {
         i,
         color: COLORS[Math.floor(r6 * COLORS.length)],
         shape,
-        // Exact match-tile center — no scatter at spawn
         originX: ox,
         originY: oy,
         burstX,
         burstY,
+        // Midpoint: still moving out but starting to fall (natural arc)
+        midX: burstX * (0.75 + r7 * 0.1) + wind * 0.35,
+        midY: burstY * 0.55 + (fallY - burstY) * 0.22,
         fallX,
         fallY,
-        // Essentially simultaneous so the blast reads as one explosion
-        delay: r1 * 0.025,
-        duration: 1.7 + r2 * 0.55, // slower overall
+        delay: r1 * 0.03,
+        duration,
         rot0: r3 * 360,
-        spinAmt: 180 + r4 * 400,
-        w: shape === 'ribbon' ? 3 + r5 * 4 : shape === 'circle' ? 5 + r5 * 6 : 5 + r5 * 7,
+        // Spin scales with lateral speed (tumbling in air)
+        spinAmt: 120 + Math.abs(burstX) * 2.2 + r4 * 280,
+        w: shape === 'ribbon' ? 2.5 + r5 * 3.5 : shape === 'circle' ? 4 + r5 * 5 : 4 + r5 * 6,
         h:
           shape === 'ribbon'
-            ? 12 + r6 * 16
+            ? 12 + r6 * 18
             : shape === 'circle'
-              ? 5 + r5 * 6
+              ? 4 + r5 * 5
               : shape === 'square'
-                ? 6 + r5 * 5
-                : 4 + r6 * 5,
-        spin: r6 > 0.5 ? 1 : -1,
+                ? 5 + r5 * 4
+                : 3.5 + r6 * 4,
+        spin: burstX >= 0 ? 1 : -1,
       }
     })
   }, [burst])
@@ -138,6 +157,8 @@ export function MatchBurst({ burst, onDone }: Props) {
                 '--c': p.color,
                 '--burst-x': `${p.burstX}px`,
                 '--burst-y': `${p.burstY}px`,
+                '--mid-x': `${p.midX}px`,
+                '--mid-y': `${p.midY}px`,
                 '--fall-x': `${p.fallX}px`,
                 '--fall-y': `${p.fallY}px`,
                 '--delay': `${p.delay}s`,

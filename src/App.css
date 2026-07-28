@@ -1058,39 +1058,47 @@
 }
 
 /*
- * Firework from a tight center:
- * - hold at origin briefly (reads as a spark)
- * - accelerate outward (ease-in, NOT ease-out — ease-out looked pre-exploded)
- * - then gravity fall
+ * Natural confetti arc:
+ * 1) leave center with impulse
+ * 2) apex (burst peak)
+ * 3) mid-fall (drag + gravity)
+ * 4) land off-screen
+ * Per-keyframe timing-functions = continuous motion, no hangs.
  */
 @keyframes confettiFirework {
   0% {
-    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.15);
-    animation-timing-function: cubic-bezier(0.55, 0.0, 0.75, 0.45);
+    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.2);
+    animation-timing-function: cubic-bezier(0.4, 0.0, 0.6, 0.4);
   }
-  /* Still near the center — birth of the blast */
-  8% {
+  /* Leave the spark point */
+  10% {
     transform: translate3d(
-        calc(var(--burst-x) * 0.06),
-        calc(var(--burst-y) * 0.06),
+        calc(var(--burst-x) * 0.12),
+        calc(var(--burst-y) * 0.12),
         0
       )
-      rotate(calc(var(--rot0) + var(--spin-amt) * 0.05 * var(--spin, 1)))
-      scale(0.55);
-    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+      rotate(calc(var(--rot0) + var(--spin-amt) * 0.08 * var(--spin, 1)))
+      scale(0.7);
+    animation-timing-function: cubic-bezier(0.15, 0.65, 0.25, 1);
   }
-  /* Peak of the explosion */
-  32% {
+  /* Apex of the pop */
+  28% {
     transform: translate3d(var(--burst-x), var(--burst-y), 0)
-      rotate(calc(var(--rot0) + var(--spin-amt) * 0.4 * var(--spin, 1)))
-      scale(1.12);
-    animation-timing-function: cubic-bezier(0.45, 0.0, 0.8, 0.25);
+      rotate(calc(var(--rot0) + var(--spin-amt) * 0.35 * var(--spin, 1)))
+      scale(1.05);
+    animation-timing-function: cubic-bezier(0.35, 0.0, 0.55, 0.35);
   }
-  /* Fall away under gravity */
+  /* Falling — horizontal slowed by drag, vertical accelerating */
+  55% {
+    transform: translate3d(var(--mid-x), var(--mid-y), 0)
+      rotate(calc(var(--rot0) + var(--spin-amt) * 0.65 * var(--spin, 1)))
+      scale(0.95);
+    animation-timing-function: cubic-bezier(0.4, 0.0, 0.7, 0.2);
+  }
   100% {
     transform: translate3d(var(--fall-x), var(--fall-y), 0)
       rotate(calc(var(--rot0) + var(--spin-amt) * var(--spin, 1)))
-      scale(0.6);
+      scale(0.55);
   }
 }
 
@@ -1098,10 +1106,10 @@
   0% {
     opacity: 0;
   }
-  3% {
+  4% {
     opacity: 1;
   }
-  55% {
+  62% {
     opacity: 1;
   }
   100% {
