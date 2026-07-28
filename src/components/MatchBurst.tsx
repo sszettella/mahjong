@@ -9,7 +9,7 @@ export interface MatchOrigin {
 export interface MatchBurstData {
   id: number
   matchNumber: number
-  /** Origins to rain from — typically board tile + storage slot */
+  /** Single origin (storage preferred) — confetti rains from one place only */
   origins: MatchOrigin[]
 }
 
@@ -18,7 +18,7 @@ interface Props {
   onDone: () => void
 }
 
-const PIECES_PER_ORIGIN = 40
+const PIECES_PER_ORIGIN = 56
 const BURST_MS = 2300
 
 const COLORS = [

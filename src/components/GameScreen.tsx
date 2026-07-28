@@ -144,10 +144,15 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
           matches: stats.matches + 1,
         }
 
-        // Capture positions before tiles disappear — confetti rains from match sites
-        const origins = getTileOrigins(gameScreenRef.current, [id, result.matchedId])
-        // Prefer storage-first ordering (user often looks at tray); keep both if found
-        const storageFirst = [...origins].sort((a, b) => a.y - b.y)
+        // One origin only: the storage tile that matched (not the board tile just tapped)
+        const storageOrigins = getTileOrigins(gameScreenRef.current, [result.matchedId])
+        const boardOrigins = getTileOrigins(gameScreenRef.current, [id])
+        const origins =
+          storageOrigins.length > 0
+            ? storageOrigins
+            : boardOrigins.length > 0
+              ? boardOrigins
+              : [{ x: window.innerWidth / 2, y: 100 }]
 
         setAnimating(true)
         setMatchingIds([id, result.matchedId])
@@ -155,10 +160,7 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
         setMatchBurst({
           id: burstSeq.current,
           matchNumber: nextStats.matches,
-          origins:
-            storageFirst.length > 0
-              ? storageFirst
-              : [{ x: window.innerWidth / 2, y: 120 }],
+          origins,
         })
 
         try {
