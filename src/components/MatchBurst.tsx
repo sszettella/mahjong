@@ -18,8 +18,8 @@ interface Props {
   onDone: (burstId: number) => void
 }
 
-const PIECE_COUNT = 64
-const BURST_MS = 1800
+const PIECE_COUNT = 52
+const BURST_MS = 2600
 
 const COLORS = [
   '#ff5c5c',
@@ -68,15 +68,15 @@ export function MatchBurst({ burst, onDone }: Props) {
       const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon', 'circle']
       const shape = shapes[Math.floor(r1 * shapes.length)]
 
-      // Full 360° firework — all pieces share the same origin, fly outward
-      const angle = (i / PIECE_COUNT) * Math.PI * 2 + (r1 - 0.5) * 0.4
-      const power = 90 + r2 * 150
+      // Full 360° firework — tighter radius, slower motion
+      const angle = (i / PIECE_COUNT) * Math.PI * 2 + (r1 - 0.5) * 0.35
+      const power = 42 + r2 * 55 // was ~90–240; now ~42–97
       const burstX = Math.cos(angle) * power
-      const burstY = Math.sin(angle) * power * 0.95 - 10
+      const burstY = Math.sin(angle) * power * 0.95 - 6
 
-      // After the blast, gravity pulls everything down
-      const fallX = burstX * 1.1 + (r3 - 0.5) * 28
-      const fallY = burstY + 240 + r4 * 260
+      // After the blast, gravity pulls everything down (gentler drift)
+      const fallX = burstX * 1.05 + (r3 - 0.5) * 18
+      const fallY = burstY + 180 + r4 * 200
 
       return {
         i,
@@ -90,10 +90,10 @@ export function MatchBurst({ burst, onDone }: Props) {
         fallX,
         fallY,
         // Essentially simultaneous so the blast reads as one explosion
-        delay: r1 * 0.02,
-        duration: 1.2 + r2 * 0.4,
+        delay: r1 * 0.025,
+        duration: 1.7 + r2 * 0.55, // slower overall
         rot0: r3 * 360,
-        spinAmt: 280 + r4 * 640,
+        spinAmt: 180 + r4 * 400,
         w: shape === 'ribbon' ? 3 + r5 * 4 : shape === 'circle' ? 5 + r5 * 6 : 5 + r5 * 7,
         h:
           shape === 'ribbon'

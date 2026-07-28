@@ -1030,8 +1030,8 @@
   backface-visibility: hidden;
   will-change: transform, opacity;
   animation:
-    confettiFirework var(--dur, 1.4s) forwards,
-    confettiFade var(--dur, 1.4s) linear forwards;
+    confettiFirework var(--dur, 1.9s) forwards,
+    confettiFade var(--dur, 1.9s) linear forwards;
   animation-delay: var(--delay, 0s), var(--delay, 0s);
   box-shadow: 0 0 6px color-mix(in srgb, var(--c, #ffd166) 55%, transparent);
   transform-origin: center center;
