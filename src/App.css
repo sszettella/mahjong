@@ -967,7 +967,7 @@
   }
 }
 
-/* Confetti — GPU-friendly pop + smooth rain */
+/* Confetti — continuous rain (no multi-stop keyframes = no pauses) */
 .confetti-field {
   position: absolute;
   inset: 0;
@@ -987,16 +987,15 @@
   height: var(--h, 8px);
   background: var(--c, #ffd166);
   opacity: 0;
-  /* Force compositor layer for smooth animation on iOS */
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   will-change: transform, opacity;
-  animation-name: confettiRain;
-  animation-duration: var(--dur, 1.6s);
-  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-  animation-fill-mode: forwards;
-  animation-delay: var(--delay, 0s);
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  /* Linear rotation + ease-in fall feel smooth with only 2 transform keyframes */
+  animation:
+    confettiFall var(--dur, 1.7s) cubic-bezier(0.33, 0.0, 0.67, 0.35) forwards,
+    confettiFade var(--dur, 1.7s) linear forwards;
+  animation-delay: var(--delay, 0s), var(--delay, 0s);
+  box-shadow: none;
   transform-origin: center center;
   pointer-events: none;
 }
@@ -1018,44 +1017,32 @@
   transform-origin: 50% 15%;
 }
 
-/* Smooth stages with translate3d for 60fps rain */
-@keyframes confettiRain {
+/*
+ * Only start + end for position: CSS eases continuously between them.
+ * Multi-step keyframes were causing visible "hangs" at each stop.
+ */
+@keyframes confettiFall {
   0% {
-    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.35);
-    opacity: 0;
-  }
-  5% {
-    opacity: 1;
-  }
-  12% {
-    transform: translate3d(var(--pop-x), var(--pop-y), 0)
-      rotate(calc(var(--rot0) + var(--rot1) * 0.2 * var(--spin, 1)))
-      scale(1);
-    opacity: 1;
-  }
-  26% {
-    transform: translate3d(var(--mid-x), var(--mid-y), 0)
-      rotate(calc(var(--rot0) + var(--rot1) * 0.45 * var(--spin, 1)))
-      scale(1);
-    opacity: 1;
-  }
-  55% {
-    transform: translate3d(
-        calc(var(--mid-x) * 0.5 + var(--rain-x) * 0.5),
-        calc(var(--mid-y) + (var(--rain-y) - var(--mid-y)) * 0.45),
-        0
-      )
-      rotate(calc(var(--rot0) + var(--rot1) * 0.75 * var(--spin, 1) + var(--rot2) * 0.15))
-      scale(0.96);
-    opacity: 0.95;
-  }
-  88% {
-    opacity: 0.7;
+    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.55);
   }
   100% {
-    transform: translate3d(var(--rain-x), var(--rain-y), 0)
-      rotate(calc(var(--rot0) + (var(--rot1) + var(--rot2)) * var(--spin, 1)))
-      scale(0.72);
+    transform: translate3d(var(--end-x), var(--end-y), 0)
+      rotate(calc(var(--rot0) + var(--spin-amt) * var(--spin, 1)))
+      scale(0.7);
+  }
+}
+
+@keyframes confettiFade {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
     opacity: 0;
   }
 }

@@ -69,30 +69,23 @@ export function MatchBurst({ burst, onDone }: Props) {
       const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon']
       const shape = shapes[Math.floor(r1 * shapes.length)]
 
-      // Gentle upward pop, then long smooth rain
-      const popX = (r2 - 0.5) * 56
-      const popY = -16 - r3 * 48
-      const sway = (r4 - 0.5) * 70
-      const rainY = 260 + r5 * 340
-      const rainX = popX * 0.35 + sway
+      // Continuous path: drift sideways + fall off screen (no mid waypoints)
+      const endX = (r2 - 0.5) * 120
+      const endY = 300 + r3 * 380
 
       return {
         i,
         color: COLORS[Math.floor(r6 * COLORS.length)],
         shape,
-        originX: ox + (r1 - 0.5) * 18,
-        originY: oy + (r2 - 0.5) * 10,
-        popX,
-        popY,
-        midX: popX * 0.7 + sway * 0.4,
-        midY: popY * 0.2 + 24 + r3 * 28,
-        rainX,
-        rainY,
-        delay: r1 * 0.12 + (i % 7) * 0.018,
-        duration: 1.45 + r2 * 0.55,
+        originX: ox + (r1 - 0.5) * 14,
+        originY: oy + (r2 - 0.5) * 8,
+        endX,
+        endY,
+        // Short stagger so rain looks full without choppy waves
+        delay: r1 * 0.08 + (i % 6) * 0.012,
+        duration: 1.55 + r2 * 0.5,
         rot0: r3 * 360,
-        rot1: (r4 - 0.5) * 480,
-        rot2: (r5 - 0.5) * 720,
+        spinAmt: 200 + r4 * 520,
         w: shape === 'ribbon' ? 3 + r5 * 3.5 : shape === 'circle' ? 5 + r5 * 5 : 5 + r5 * 6,
         h:
           shape === 'ribbon'
@@ -143,17 +136,12 @@ export function MatchBurst({ burst, onDone }: Props) {
                 left: p.originX,
                 top: p.originY,
                 '--c': p.color,
-                '--pop-x': `${p.popX}px`,
-                '--pop-y': `${p.popY}px`,
-                '--mid-x': `${p.midX}px`,
-                '--mid-y': `${p.midY}px`,
-                '--rain-x': `${p.rainX}px`,
-                '--rain-y': `${p.rainY}px`,
+                '--end-x': `${p.endX}px`,
+                '--end-y': `${p.endY}px`,
                 '--delay': `${p.delay}s`,
                 '--dur': `${p.duration}s`,
                 '--rot0': `${p.rot0}deg`,
-                '--rot1': `${p.rot1}deg`,
-                '--rot2': `${p.rot2}deg`,
+                '--spin-amt': `${p.spinAmt}deg`,
                 '--spin': p.spin,
                 '--w': `${p.w}px`,
                 '--h': `${p.h}px`,
