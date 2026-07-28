@@ -7,8 +7,9 @@ export interface Slot {
   z: number
 }
 
-/** Max tiles across — keeps the board readable on phones */
+/** Max footprint — keeps the board readable on phones */
 export const MAX_BOARD_WIDTH = 8
+export const MAX_BOARD_HEIGHT = 9
 
 /** Generate position slots for a level layout. */
 export function generateSlots(config: LevelConfig): Slot[] {
@@ -45,7 +46,7 @@ export function generateSlots(config: LevelConfig): Slot[] {
       slots = slotsGrid(tileCount, layers, rng)
   }
 
-  return clampWidth(trimToEven(slots, tileCount), MAX_BOARD_WIDTH)
+  return clampFootprint(trimToEven(slots, tileCount), MAX_BOARD_WIDTH, MAX_BOARD_HEIGHT)
 }
 
 function takeEven(n: number): number {
@@ -56,13 +57,18 @@ function capWidth(n: number): number {
   return Math.min(MAX_BOARD_WIDTH, Math.max(2, n))
 }
 
+function capHeight(n: number): number {
+  return Math.min(MAX_BOARD_HEIGHT, Math.max(2, n))
+}
+
 function slotsGrid(count: number, layers: number, rng: () => number): Slot[] {
   const slots: Slot[] = []
-  const perLayer = Math.ceil(count / layers)
-  // Prefer wider layouts up to the cap, then grow rows
-  let cols = Math.ceil(Math.sqrt(perLayer * 1.2))
+  const perLayer = Math.ceil(count / Math.max(1, layers))
+  // Prefer full width, grow height up to cap, then rely on layers
+  let cols = Math.ceil(Math.sqrt(perLayer * 1.15))
   cols = capWidth(cols)
   let rows = Math.ceil(perLayer / cols)
+  rows = capHeight(rows)
 
   for (let z = 0; z < layers; z++) {
     const layerCount =
@@ -70,10 +76,10 @@ function slotsGrid(count: number, layers: number, rng: () => number): Slot[] {
         ? count - slots.length
         : Math.min(perLayer, count - slots.length)
     const c = Math.max(2, Math.min(cols, cols - Math.min(z, cols - 2)))
-    const r = Math.max(2, rows + Math.floor(z > 0 ? (perLayer - c * rows) / Math.max(1, c) : 0) + Math.floor(z / 2))
+    const r = Math.max(2, Math.min(rows, MAX_BOARD_HEIGHT - Math.min(z, 2)))
     let placed = 0
     const offsetX = (cols - c) / 2
-    const offsetY = 0
+    const offsetY = (rows - r) / 2
     for (let y = 0; y < r && placed < layerCount; y++) {
       for (let x = 0; x < c && placed < layerCount; x++) {
         if (z > 0 && rng() < 0.12 && placed < layerCount - 2) continue
@@ -81,14 +87,14 @@ function slotsGrid(count: number, layers: number, rng: () => number): Slot[] {
         placed++
       }
     }
-    // If still short on this layer, add more rows within width
-    let extraY = r
+    // Fill remaining on this layer within the height cap (stack denser via z if full)
+    let y = 0
+    let x = 0
     while (placed < layerCount) {
-      for (let x = 0; x < c && placed < layerCount; x++) {
-        slots.push({ x: x + offsetX, y: extraY, z })
-        placed++
-      }
-      extraY++
+      slots.push({ x: (x % c) + offsetX, y: (y % r) + offsetY, z })
+      placed++
+      x++
+      if (x % c === 0) y++
     }
   }
   return slots
@@ -98,7 +104,7 @@ function slotsPyramid(count: number, layers: number, _rng: () => number): Slot[]
   const slots: Slot[] = []
   let remaining = count
   let size = Math.ceil(Math.sqrt(count / Math.max(1, layers * 0.7)))
-  size = capWidth(Math.max(3, size))
+  size = Math.min(capWidth(Math.max(3, size)), capHeight(Math.max(3, size)))
 
   for (let z = 0; z < layers && remaining > 0; z++) {
     const s = Math.max(1, size - z)
@@ -110,51 +116,65 @@ function slotsPyramid(count: number, layers: number, _rng: () => number): Slot[]
       }
     }
   }
-  // Fill extras downward within width
-  let y = size
+  // Fill extras within footprint (prefer higher layers via z wrapping)
+  let y = 0
+  let z = 0
   while (remaining > 0) {
     for (let x = 0; x < size && remaining > 0; x++) {
-      slots.push({ x, y, z: 0 })
+      slots.push({ x, y: y % size, z: Math.min(layers - 1, z) })
       remaining--
     }
     y++
+    if (y % size === 0) z++
   }
   return slots
 }
 
 function slotsCross(count: number, layers: number, _rng: () => number): Slot[] {
   const slots: Slot[] = []
-  // arm*2+1 must be ≤ MAX_BOARD_WIDTH
+  // arm*2+1 must fit in both width and height caps
   let arm = Math.max(2, Math.ceil(Math.sqrt(count / layers) / 1.5))
-  arm = Math.min(arm, Math.floor((MAX_BOARD_WIDTH - 1) / 2))
+  arm = Math.min(
+    arm,
+    Math.floor((MAX_BOARD_WIDTH - 1) / 2),
+    Math.floor((MAX_BOARD_HEIGHT - 1) / 2),
+  )
   const mid = arm
   const width = arm * 2 + 1
+  const height = width
 
   for (let z = 0; z < layers; z++) {
     for (let x = 0; x < width; x++) {
       slots.push({ x: x + z * 0.05, y: mid + z * 0.05, z })
     }
-    for (let y = 0; y < width; y++) {
+    for (let y = 0; y < height; y++) {
       if (y === mid) continue
       slots.push({ x: mid + z * 0.05, y: y + z * 0.05, z })
     }
   }
-  // Extra tiles as additional cross arms downward if needed
-  let extra = 0
+  // Extra tiles fill within the cross bounds on higher z
+  let z = 0
+  let y = 0
   while (slots.length < count) {
-    const y = width + extra
-    slots.push({ x: mid, y, z: 0 })
-    if (slots.length < count) slots.push({ x: Math.max(0, mid - 1), y, z: 0 })
-    extra++
+    slots.push({ x: mid, y: y % height, z: Math.min(layers - 1, z) })
+    if (slots.length < count) {
+      slots.push({ x: Math.max(0, mid - 1), y: y % height, z: Math.min(layers - 1, z) })
+    }
+    y++
+    if (y % height === 0) z++
   }
   return slots
 }
 
 function slotsDiamond(count: number, layers: number, _rng: () => number): Slot[] {
   const slots: Slot[] = []
-  // diameter 2r+1 ≤ MAX_BOARD_WIDTH
+  // diameter 2r+1 ≤ min(width, height) caps
   let radius = Math.max(2, Math.ceil(Math.sqrt(count / layers)))
-  radius = Math.min(radius, Math.floor((MAX_BOARD_WIDTH - 1) / 2))
+  radius = Math.min(
+    radius,
+    Math.floor((MAX_BOARD_WIDTH - 1) / 2),
+    Math.floor((MAX_BOARD_HEIGHT - 1) / 2),
+  )
 
   for (let z = 0; z < layers; z++) {
     const r = Math.max(1, radius - Math.floor(z / 2))
@@ -166,23 +186,26 @@ function slotsDiamond(count: number, layers: number, _rng: () => number): Slot[]
       }
     }
   }
-  let y = radius * 2 + 1
+  const span = radius * 2 + 1
+  let i = 0
   while (slots.length < count) {
-    for (let x = 0; x <= radius * 2 && slots.length < count; x++) {
-      slots.push({ x, y, z: 0 })
-    }
-    y++
+    const x = i % span
+    const y = Math.floor(i / span) % span
+    const z = Math.min(layers - 1, Math.floor(i / (span * span)))
+    slots.push({ x, y, z })
+    i++
   }
   return slots
 }
 
 function slotsTurtle(count: number, layers: number, _rng: () => number): Slot[] {
   const slots: Slot[] = []
-  // body + 1 pad each side for feet → bodyW ≤ MAX_BOARD_WIDTH - 2
+  // body + pads for feet/head/tail must fit width & height caps
   let bodyW = Math.max(4, Math.ceil(Math.sqrt(count * 0.55)))
   bodyW = Math.min(bodyW, MAX_BOARD_WIDTH - 2)
-  const bodyH = Math.max(3, Math.ceil(bodyW * 0.7))
-  const ox0 = 1 // leave column 0 for left feet
+  let bodyH = Math.max(3, Math.ceil(bodyW * 0.7))
+  bodyH = Math.min(bodyH, MAX_BOARD_HEIGHT - 3) // head + tail rows
+  const ox0 = 1
 
   for (let z = 0; z < Math.min(layers, 4); z++) {
     const w = Math.max(2, bodyW - z * 2)
@@ -196,22 +219,27 @@ function slotsTurtle(count: number, layers: number, _rng: () => number): Slot[] 
     }
   }
 
-  // Head / tail / feet within width
   const midX = ox0 + bodyW / 2
+  const maxY = bodyH + 2 // within height budget
   slots.push({ x: midX, y: 0, z: 0 })
   if (count > 20) slots.push({ x: midX - 0.5, y: 0, z: 0 })
-  slots.push({ x: midX, y: bodyH + 2, z: 0 })
+  slots.push({ x: midX, y: Math.min(MAX_BOARD_HEIGHT - 1, maxY), z: 0 })
   slots.push({ x: 0, y: 1, z: 0 })
   slots.push({ x: Math.min(MAX_BOARD_WIDTH - 1, bodyW + 1), y: 1, z: 0 })
   slots.push({ x: 0, y: bodyH + 1, z: 0 })
-  slots.push({ x: Math.min(MAX_BOARD_WIDTH - 1, bodyW + 1), y: bodyH + 1, z: 0 })
+  slots.push({
+    x: Math.min(MAX_BOARD_WIDTH - 1, bodyW + 1),
+    y: Math.min(MAX_BOARD_HEIGHT - 1, bodyH + 1),
+    z: 0,
+  })
 
-  let y = bodyH + 3
+  let i = 0
   while (slots.length < count) {
-    for (let x = 0; x < bodyW && slots.length < count; x++) {
-      slots.push({ x: ox0 + x, y, z: 0 })
-    }
-    y++
+    const x = ox0 + (i % bodyW)
+    const y = 1 + (Math.floor(i / bodyW) % bodyH)
+    const z = Math.min(layers - 1, Math.floor(i / (bodyW * bodyH)))
+    slots.push({ x, y, z })
+    i++
   }
   return slots
 }
@@ -219,7 +247,7 @@ function slotsTurtle(count: number, layers: number, _rng: () => number): Slot[] 
 function slotsFortress(count: number, layers: number, _rng: () => number): Slot[] {
   const slots: Slot[] = []
   let size = Math.max(4, Math.ceil(Math.sqrt(count / Math.max(1, layers))))
-  size = capWidth(size)
+  size = Math.min(capWidth(size), capHeight(size))
 
   for (let z = 0; z < layers; z++) {
     const s = Math.max(2, size - z)
@@ -234,12 +262,13 @@ function slotsFortress(count: number, layers: number, _rng: () => number): Slot[
       }
     }
   }
-  let y = size
+  let i = 0
   while (slots.length < count) {
-    for (let x = 0; x < size && slots.length < count; x++) {
-      slots.push({ x, y, z: 0 })
-    }
-    y++
+    const x = i % size
+    const y = Math.floor(i / size) % size
+    const z = Math.min(layers - 1, Math.floor(i / (size * size)))
+    slots.push({ x, y, z })
+    i++
   }
   return slots
 }
@@ -247,7 +276,7 @@ function slotsFortress(count: number, layers: number, _rng: () => number): Slot[
 function slotsSpiral(count: number, layers: number, _rng: () => number): Slot[] {
   const slots: Slot[] = []
   let size = Math.max(4, Math.ceil(Math.sqrt(count / layers)))
-  size = capWidth(size)
+  size = Math.min(capWidth(size), capHeight(size))
 
   for (let z = 0; z < layers; z++) {
     let x = 0
@@ -257,13 +286,11 @@ function slotsSpiral(count: number, layers: number, _rng: () => number): Slot[] 
     let segment = 1
     let passed = 0
     const max = size * size
-    // Keep spiral inside [0, size)
-    const ox = 0
-    const oy = 0
 
     for (let i = 0; i < max && slots.length < count; i++) {
-      const px = Math.min(MAX_BOARD_WIDTH - 1, Math.max(0, x + ox + z * 0.05))
-      slots.push({ x: px, y: y + oy + z * 0.05, z })
+      const px = Math.min(MAX_BOARD_WIDTH - 1, Math.max(0, x + z * 0.05))
+      const py = Math.min(MAX_BOARD_HEIGHT - 1, Math.max(0, y + z * 0.05))
+      slots.push({ x: px, y: py, z })
       x += dx
       y += dy
       passed++
@@ -276,21 +303,21 @@ function slotsSpiral(count: number, layers: number, _rng: () => number): Slot[] 
       }
     }
   }
-  let y = size
+  let i = 0
   while (slots.length < count) {
-    for (let x = 0; x < size && slots.length < count; x++) {
-      slots.push({ x, y, z: 0 })
-    }
-    y++
+    const x = i % size
+    const y = Math.floor(i / size) % size
+    const z = Math.min(layers - 1, Math.floor(i / (size * size)))
+    slots.push({ x, y, z })
+    i++
   }
   return slots
 }
 
 function slotsBridge(count: number, layers: number, _rng: () => number): Slot[] {
   const slots: Slot[] = []
-  // span is total width including towers
   const span = MAX_BOARD_WIDTH
-  const towerH = Math.max(3, Math.min(8, Math.ceil(count / (layers * 6))))
+  const towerH = Math.max(3, Math.min(MAX_BOARD_HEIGHT - 1, Math.ceil(count / (layers * 6))))
 
   for (let z = 0; z < layers; z++) {
     for (let y = 0; y < towerH; y++) {
@@ -302,54 +329,61 @@ function slotsBridge(count: number, layers: number, _rng: () => number): Slot[] 
     const deckY = Math.floor(towerH / 2)
     for (let x = 2; x < span - 2; x++) {
       slots.push({ x, y: deckY, z })
-      if (z === 0) slots.push({ x, y: deckY + 1, z })
+      if (z === 0 && deckY + 1 < MAX_BOARD_HEIGHT) {
+        slots.push({ x, y: deckY + 1, z })
+      }
     }
   }
-  let y = towerH
+  let i = 0
   while (slots.length < count) {
-    for (let x = 0; x < span && slots.length < count; x++) {
-      slots.push({ x, y, z: 0 })
-    }
-    y++
+    const x = i % span
+    const y = Math.floor(i / span) % MAX_BOARD_HEIGHT
+    const z = Math.min(layers - 1, Math.floor(i / (span * MAX_BOARD_HEIGHT)))
+    slots.push({ x, y, z })
+    i++
   }
   return slots
 }
 
 /**
- * Ensure all slots fit in [0, maxW) in x (span of distinct columns ≤ maxW).
- * Integer-snaps after shift; if still too wide, re-bins into maxW columns.
+ * Ensure all slots fit in maxW × maxH (tile footprint).
+ * Shifts to origin; re-bins axes that exceed the caps.
  */
-function clampWidth(slots: Slot[], maxW: number): Slot[] {
+function clampFootprint(slots: Slot[], maxW: number, maxH: number): Slot[] {
   if (slots.length === 0) return slots
 
   let minX = Infinity
   let maxX = -Infinity
   let minY = Infinity
+  let maxY = -Infinity
   for (const s of slots) {
     minX = Math.min(minX, s.x)
     maxX = Math.max(maxX, s.x)
     minY = Math.min(minY, s.y)
+    maxY = Math.max(maxY, s.y)
   }
 
-  // Shift to origin
   let result = slots.map((s) => ({
     ...s,
     x: s.x - minX,
     y: s.y - minY,
   }))
 
-  maxX = maxX - minX
-  // Occupied width in grid units (tiles are ~1 unit wide)
-  const span = maxX // max x value after shift
-  if (span <= maxW - 1 + 1e-6) {
-    return result
-  }
+  const spanX = maxX - minX
+  const spanY = maxY - minY
 
-  // Re-bin x into maxW columns while preserving relative order
-  result = result.map((s) => ({
-    ...s,
-    x: Math.min(maxW - 1, Math.round((s.x / span) * (maxW - 1))),
-  }))
+  if (spanX > maxW - 1 + 1e-6) {
+    result = result.map((s) => ({
+      ...s,
+      x: Math.min(maxW - 1, Math.round((s.x / spanX) * (maxW - 1))),
+    }))
+  }
+  if (spanY > maxH - 1 + 1e-6) {
+    result = result.map((s) => ({
+      ...s,
+      y: Math.min(maxH - 1, Math.round((s.y / spanY) * (maxH - 1))),
+    }))
+  }
   return result
 }
 
