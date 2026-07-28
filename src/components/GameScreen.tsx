@@ -54,19 +54,9 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
   const [matchBurst, setMatchBurst] = useState<MatchBurstData | null>(null)
   const [animating, setAnimating] = useState(false)
   const [parkFlashId, setParkFlashId] = useState<string | null>(null)
-  const [boardTileSize, setBoardTileSize] = useState<{ w: number; h: number } | null>(null)
   const burstSeq = useRef(0)
   const animTimer = useRef<number | null>(null)
   const gameScreenRef = useRef<HTMLDivElement>(null)
-
-  const handleTileSize = useCallback((size: { w: number; h: number }) => {
-    setBoardTileSize((prev) => {
-      if (prev && Math.abs(prev.w - size.w) < 0.5 && Math.abs(prev.h - size.h) < 0.5) {
-        return prev
-      }
-      return size
-    })
-  }, [])
 
   const clearAnimTimer = () => {
     if (animTimer.current != null) {
@@ -320,7 +310,6 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
         matchingIds={matchingIds}
         parkFlashId={parkFlashId}
         failed={showFail}
-        tileSize={boardTileSize}
       />
 
       <Board
@@ -329,7 +318,6 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
         hintIds={hintIds}
         matchingIds={matchingIds}
         onSelect={handleSelectBoard}
-        onTileSize={handleTileSize}
       />
 
       <MatchBurst burst={matchBurst} onDone={handleBurstDone} />

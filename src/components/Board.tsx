@@ -9,8 +9,6 @@ interface Props {
   hintIds: string[]
   matchingIds?: string[]
   onSelect: (id: string) => void
-  /** Report board tile size so storage can match (never larger) */
-  onTileSize?: (size: { w: number; h: number }) => void
 }
 
 /** Stable key for a deal — layout positions, not which tiles remain. */
@@ -24,7 +22,6 @@ export function Board({
   hintIds,
   matchingIds = [],
   onSelect,
-  onTileSize,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState({ w: 360, h: 420 })
@@ -87,10 +84,6 @@ export function Board({
 
     return { tileW: w, tileH: h }
   }, [viewport.w, viewport.h, cols, rows, maxZ, dealKey])
-
-  useEffect(() => {
-    onTileSize?.({ w: tileW, h: tileH })
-  }, [tileW, tileH, onTileSize])
 
   const gapX = tileW * 1.02
   const gapY = tileH * 1.0

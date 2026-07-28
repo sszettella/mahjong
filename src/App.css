@@ -789,9 +789,7 @@
   letter-spacing: 0.1em;
   color: var(--cream-dim);
   padding: 0 2px;
-  max-width: 260px;
   margin: 0 auto;
-  width: 100%;
 }
 
 .storage-count {
