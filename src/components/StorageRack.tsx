@@ -4,9 +4,9 @@ import { faceKey } from '../tiles'
 import { TileFaceContent } from './TileFace'
 
 /** Fixed storage tile size — independent of board layout width */
-export const STORAGE_TILE_W = 44
-export const STORAGE_TILE_H = Math.round(STORAGE_TILE_W * 1.28) // ~56
-const SLOT_GAP = 8
+export const STORAGE_TILE_W = 52
+export const STORAGE_TILE_H = Math.round(STORAGE_TILE_W * 1.28) // ~67
+const SLOT_GAP = 10
 
 interface Props {
   storage: StorageSlots

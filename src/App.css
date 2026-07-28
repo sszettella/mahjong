@@ -1,7 +1,7 @@
 .app {
   height: 100%;
   width: 100%;
-  max-width: 520px;
+  max-width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -447,8 +447,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Use almost full width of the phone */
-  padding: 4px 6px 6px;
+  /* Edge-to-edge play area */
+  padding: 2px 2px 4px;
   position: relative;
   width: 100%;
 }
@@ -457,7 +457,7 @@
 .board-scroll::before {
   content: '';
   position: absolute;
-  inset: 4% 2%;
+  inset: 2% 0;
   border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%;
   background:
     radial-gradient(ellipse 60% 50% at 30% 40%, rgba(140, 230, 180, 0.18), transparent 70%),
@@ -472,8 +472,8 @@
   flex-shrink: 0;
   z-index: 1;
   /* Plush green felt pad — fills measured play area */
-  padding: 8px 6px;
-  border-radius: 18px;
+  padding: 6px 4px;
+  border-radius: 14px;
   max-width: 100%;
   background:
     radial-gradient(ellipse 90% 75% at 50% 35%, rgba(120, 210, 160, 0.28), transparent 65%),
@@ -770,13 +770,13 @@
   }
 }
 
-/* —— Storage rack (compact, above board) —— */
+/* —— Storage rack (fixed size, above board) —— */
 .storage-rack {
   flex-shrink: 0;
-  padding: 2px 16px 6px;
+  padding: 4px 12px 8px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   background: linear-gradient(180deg, rgba(20, 55, 42, 0.3), transparent);
 }
 
