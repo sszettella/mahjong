@@ -447,8 +447,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Edge-to-edge play area */
-  padding: 2px 2px 4px;
+  /* Flush to device edges */
+  padding: 0;
   position: relative;
   width: 100%;
 }
@@ -457,8 +457,8 @@
 .board-scroll::before {
   content: '';
   position: absolute;
-  inset: 2% 0;
-  border-radius: 40% 60% 55% 45% / 50% 40% 60% 50%;
+  inset: 0;
+  border-radius: 0;
   background:
     radial-gradient(ellipse 60% 50% at 30% 40%, rgba(140, 230, 180, 0.18), transparent 70%),
     radial-gradient(ellipse 50% 45% at 75% 65%, rgba(80, 180, 130, 0.14), transparent 70%);
@@ -471,19 +471,19 @@
   margin: auto;
   flex-shrink: 0;
   z-index: 1;
-  /* Plush green felt pad — fills measured play area */
-  padding: 6px 4px;
-  border-radius: 14px;
+  /* Felt pad tight to the edges */
+  padding: 2px 1px;
+  border-radius: 8px;
   max-width: 100%;
   background:
     radial-gradient(ellipse 90% 75% at 50% 35%, rgba(120, 210, 160, 0.28), transparent 65%),
     radial-gradient(ellipse 70% 60% at 50% 80%, rgba(20, 70, 50, 0.35), transparent 70%),
     linear-gradient(165deg, #2a7a5c 0%, #1f6149 45%, #184a38 100%);
   box-shadow:
-    inset 0 2px 0 rgba(200, 255, 220, 0.18),
-    inset 0 -3px 8px rgba(0, 40, 25, 0.35),
-    0 0 0 1px rgba(160, 230, 190, 0.15),
-    0 8px 24px rgba(8, 30, 22, 0.4);
+    inset 0 1px 0 rgba(200, 255, 220, 0.15),
+    inset 0 -2px 6px rgba(0, 40, 25, 0.3),
+    0 0 0 1px rgba(160, 230, 190, 0.12),
+    0 4px 16px rgba(8, 30, 22, 0.35);
 }
 
 /* —— Tiles (opaque stacking — top face wins) —— */
@@ -967,7 +967,7 @@
   }
 }
 
-/* Confetti — pop from origin, then rain with gravity */
+/* Confetti — GPU-friendly pop + smooth rain */
 .confetti-field {
   position: absolute;
   inset: 0;
@@ -977,7 +977,6 @@
 }
 
 .confetti-field-anchored .confetti {
-  /* left/top set inline to match site */
   margin-left: calc(var(--w, 8px) / -2);
   margin-top: calc(var(--h, 8px) / -2);
 }
@@ -988,11 +987,18 @@
   height: var(--h, 8px);
   background: var(--c, #ffd166);
   opacity: 0;
+  /* Force compositor layer for smooth animation on iOS */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   will-change: transform, opacity;
-  animation: confettiRain var(--dur, 1.6s) cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation-name: confettiRain;
+  animation-duration: var(--dur, 1.6s);
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation-fill-mode: forwards;
   animation-delay: var(--delay, 0s);
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05);
   transform-origin: center center;
+  pointer-events: none;
 }
 
 .confetti-rect {
@@ -1009,54 +1015,47 @@
 
 .confetti-ribbon {
   border-radius: 1px;
-  transform-origin: 50% 20%;
+  transform-origin: 50% 15%;
 }
 
-/* Physics stages: burst → hang → accelerate down like rain */
+/* Smooth stages with translate3d for 60fps rain */
 @keyframes confettiRain {
   0% {
-    transform: translate(0, 0) rotate(var(--rot0, 0deg)) scale(0.25);
+    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.35);
     opacity: 0;
   }
-  /* Pop into the air */
-  6% {
+  5% {
     opacity: 1;
   }
-  14% {
-    transform: translate(var(--pop-x), var(--pop-y))
-      rotate(calc(var(--rot0) + var(--rot1) * 0.25 * var(--spin, 1)))
-      scale(1.05);
-    opacity: 1;
-  }
-  /* Apex hang — slow horizontal drift */
-  28% {
-    transform: translate(var(--mid-x), var(--mid-y))
-      rotate(calc(var(--rot0) + var(--rot1) * 0.55 * var(--spin, 1)))
+  12% {
+    transform: translate3d(var(--pop-x), var(--pop-y), 0)
+      rotate(calc(var(--rot0) + var(--rot1) * 0.2 * var(--spin, 1)))
       scale(1);
     opacity: 1;
   }
-  /* Gravity takes over — accelerating fall */
-  55% {
-    transform: translate(
-        calc(var(--mid-x) * 0.55 + var(--rain-x) * 0.45),
-        calc(var(--mid-y) + (var(--rain-y) - var(--mid-y)) * 0.4)
-      )
-      rotate(calc(var(--rot0) + var(--rot1) * 0.8 * var(--spin, 1) + var(--rot2) * 0.2))
-      scale(0.98);
+  26% {
+    transform: translate3d(var(--mid-x), var(--mid-y), 0)
+      rotate(calc(var(--rot0) + var(--rot1) * 0.45 * var(--spin, 1)))
+      scale(1);
     opacity: 1;
   }
-  /* Rain through the bottom of the screen */
-  85% {
-    opacity: 0.85;
+  55% {
+    transform: translate3d(
+        calc(var(--mid-x) * 0.5 + var(--rain-x) * 0.5),
+        calc(var(--mid-y) + (var(--rain-y) - var(--mid-y)) * 0.45),
+        0
+      )
+      rotate(calc(var(--rot0) + var(--rot1) * 0.75 * var(--spin, 1) + var(--rot2) * 0.15))
+      scale(0.96);
+    opacity: 0.95;
+  }
+  88% {
+    opacity: 0.7;
   }
   100% {
-    transform: translate(var(--rain-x), var(--rain-y))
-      rotate(
-        calc(
-          var(--rot0) + (var(--rot1) + var(--rot2)) * var(--spin, 1) * var(--flutter, 1)
-        )
-      )
-      scale(0.75);
+    transform: translate3d(var(--rain-x), var(--rain-y), 0)
+      rotate(calc(var(--rot0) + (var(--rot1) + var(--rot2)) * var(--spin, 1)))
+      scale(0.72);
     opacity: 0;
   }
 }

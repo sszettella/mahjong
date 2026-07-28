@@ -14,7 +14,7 @@ import { facesMatch, shuffle, mulberry32 } from '../tiles'
 import { completeLevel } from '../storage'
 import { Board } from './Board'
 import { StorageRack } from './StorageRack'
-import { getTileOrigins, MatchBurst, type MatchBurstData } from './MatchBurst'
+import { getTileOrigin, MatchBurst, type MatchBurstData } from './MatchBurst'
 
 interface Props {
   level: number
@@ -144,23 +144,23 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
           matches: stats.matches + 1,
         }
 
-        // One origin only: the storage tile that matched (not the board tile just tapped)
-        const storageOrigins = getTileOrigins(gameScreenRef.current, [result.matchedId])
-        const boardOrigins = getTileOrigins(gameScreenRef.current, [id])
-        const origins =
-          storageOrigins.length > 0
-            ? storageOrigins
-            : boardOrigins.length > 0
-              ? boardOrigins
-              : [{ x: window.innerWidth / 2, y: 100 }]
+        // Capture origin before any re-render — prefer storage, not the tapped board tile
+        const screen = gameScreenRef.current
+        const screenW = screen?.clientWidth ?? window.innerWidth
+        const origin =
+          getTileOrigin(screen, result.matchedId) ??
+          getTileOrigin(screen, id) ?? {
+            x: screenW / 2,
+            y: 100,
+          }
 
+        const burstId = ++burstSeq.current
         setAnimating(true)
         setMatchingIds([id, result.matchedId])
-        burstSeq.current += 1
         setMatchBurst({
-          id: burstSeq.current,
+          id: burstId,
           matchNumber: nextStats.matches,
-          origins,
+          origin,
         })
 
         try {
@@ -169,16 +169,17 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
           /* ignore */
         }
 
-        // Commit removal mid-animation; confetti continues from captured origins
+        // Commit board/storage soon; confetti keeps raining from the frozen origin
         clearAnimTimer()
         animTimer.current = window.setTimeout(() => {
+          animTimer.current = null
           setBoard(result.board)
           setStorage(result.storage)
           setStats(nextStats)
           setMatchingIds([])
           setAnimating(false)
           finishWin(result.board, result.storage, nextStats)
-        }, 280)
+        }, 260)
 
         return
       }
@@ -198,8 +199,9 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
     [showWin, showFail, animating, board, storage, stats, finishWin],
   )
 
-  const handleBurstDone = useCallback(() => {
-    setMatchBurst(null)
+  const handleBurstDone = useCallback((burstId: number) => {
+    // Ignore stale completions if a newer match already started
+    setMatchBurst((cur) => (cur && cur.id === burstId ? null : cur))
   }, [])
 
   const handleHint = () => {

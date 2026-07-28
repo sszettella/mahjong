@@ -64,23 +64,20 @@ export function Board({
       return { tileW: lockedSizeRef.current.w, tileH: lockedSizeRef.current.h }
     }
 
-    // Minimal padding so the board uses nearly full screen width
-    const padBudget = 4
+    // Near-zero pad so felt sits tight to the device edge
+    const padBudget = 2
     const availW = Math.max(80, viewport.w - padBudget * 2)
     const availH = Math.max(80, viewport.h - padBudget * 2)
 
     const gapFactorX = 1.0
     const gapFactorY = 1.28
-    // Slight z depth budget — keep stacks readable without eating width
     const zFactor = 0.1 * (maxZ + 1) + 0.06 * maxZ
 
-    const fromW = availW / (cols * gapFactorX + zFactor + 0.12)
-    const fromH = availH / (rows * gapFactorY + zFactor + 0.2)
-    // Prefer filling width; allow larger tiles on wide phones
-    const w = Math.max(26, Math.min(92, Math.min(fromW, fromH)))
+    const fromW = availW / (cols * gapFactorX + zFactor + 0.08)
+    const fromH = availH / (rows * gapFactorY + zFactor + 0.15)
+    const w = Math.max(26, Math.min(96, Math.min(fromW, fromH)))
     const h = w * 1.28
 
-    // Only lock once we have a real measured viewport (not the default stub)
     if (viewport.w > 200 && viewport.h > 150) {
       lockedSizeRef.current = { key: dealKey, w, h }
     }
@@ -91,7 +88,7 @@ export function Board({
   const gapX = tileW * 1.0
   const gapY = tileH * 1.0
   const layerShift = Math.max(3, Math.round(tileW * 0.1))
-  const pad = 4 + maxZ * Math.max(1, Math.floor(layerShift * 0.4))
+  const pad = 2 + maxZ * Math.max(1, Math.floor(layerShift * 0.35))
 
   const width = cols * gapX + pad * 2 + maxZ * layerShift
   const height = rows * gapY + pad * 2 + maxZ * layerShift

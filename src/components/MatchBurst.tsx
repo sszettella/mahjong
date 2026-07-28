@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react'
 
 export interface MatchOrigin {
   /** Center of the match source, relative to the game-screen layer (px) */
@@ -9,17 +9,17 @@ export interface MatchOrigin {
 export interface MatchBurstData {
   id: number
   matchNumber: number
-  /** Single origin (storage preferred) — confetti rains from one place only */
-  origins: MatchOrigin[]
+  /** Single origin — confetti rains from one place only */
+  origin: MatchOrigin
 }
 
 interface Props {
   burst: MatchBurstData | null
-  onDone: () => void
+  onDone: (burstId: number) => void
 }
 
-const PIECES_PER_ORIGIN = 56
-const BURST_MS = 2300
+const PIECE_COUNT = 42
+const BURST_MS = 2000
 
 const COLORS = [
   '#ff5c5c',
@@ -34,128 +34,109 @@ const COLORS = [
   '#ffffff',
   '#e8b84a',
   '#f0a0c8',
-  '#a8f0c8',
-  '#ffb4a2',
 ]
 
 type Shape = 'rect' | 'ribbon' | 'circle' | 'square'
 
 function seeded(n: number) {
-  const x = Math.sin(n * 12.9898) * 43758.5453
-  return x - Math.floor(x)
+  let t = (n | 0) + 0x6d2b79f5
+  t = Math.imul(t ^ (t >>> 15), t | 1)
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296
 }
 
 export function MatchBurst({ burst, onDone }: Props) {
+  const activeIdRef = useRef<number | null>(null)
+
   const pieces = useMemo(() => {
-    if (!burst || burst.origins.length === 0) return []
-    const seed = burst.id * 97 + burst.matchNumber * 13
-    const origins = burst.origins
-    const out: Array<{
-      i: number
-      color: string
-      shape: Shape
-      originX: number
-      originY: number
-      popX: number
-      popY: number
-      midX: number
-      midY: number
-      rainX: number
-      rainY: number
-      delay: number
-      duration: number
-      rot0: number
-      rot1: number
-      rot2: number
-      w: number
-      h: number
-      spin: number
-      flutter: number
-    }> = []
+    if (!burst) return []
+    const { origin, id, matchNumber } = burst
+    // Guard invalid origins (NaN / off-screen) so animation never "breaks"
+    const ox =
+      Number.isFinite(origin.x) && origin.x > 0 ? origin.x : 0
+    const oy =
+      Number.isFinite(origin.y) && origin.y > 0 ? origin.y : 80
+    const seed = id * 97 + matchNumber * 13
 
-    origins.forEach((origin, oi) => {
-      for (let j = 0; j < PIECES_PER_ORIGIN; j++) {
-        const i = oi * PIECES_PER_ORIGIN + j
-        const r1 = seeded(seed + i)
-        const r2 = seeded(seed + i + 50)
-        const r3 = seeded(seed + i + 100)
-        const r4 = seeded(seed + i + 150)
-        const r5 = seeded(seed + i + 200)
-        const r6 = seeded(seed + i + 250)
-        const r7 = seeded(seed + i + 300)
-        const r8 = seeded(seed + i + 350)
+    return Array.from({ length: PIECE_COUNT }, (_, i) => {
+      const r1 = seeded(seed + i * 3)
+      const r2 = seeded(seed + i * 3 + 1)
+      const r3 = seeded(seed + i * 3 + 2)
+      const r4 = seeded(seed + i * 7 + 11)
+      const r5 = seeded(seed + i * 11 + 23)
+      const r6 = seeded(seed + i * 13 + 41)
 
-        // Small horizontal scatter around the origin
-        const originJitterX = (r1 - 0.5) * 28
-        const originJitterY = (r2 - 0.5) * 16
+      const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon']
+      const shape = shapes[Math.floor(r1 * shapes.length)]
 
-        // Soft upward pop then rain
-        const popX = (r3 - 0.5) * 70
-        const popY = -20 - r4 * 55
-        const sway = (r5 - 0.5) * 100
-        const rainY = 220 + r6 * 380
-        const rainX = popX * 0.4 + sway + (r7 - 0.5) * 50
+      // Gentle upward pop, then long smooth rain
+      const popX = (r2 - 0.5) * 56
+      const popY = -16 - r3 * 48
+      const sway = (r4 - 0.5) * 70
+      const rainY = 260 + r5 * 340
+      const rainX = popX * 0.35 + sway
 
-        const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon']
-        const shape = shapes[Math.floor(r6 * shapes.length)]
-
-        out.push({
-          i,
-          color: COLORS[Math.floor(r8 * COLORS.length)],
-          shape,
-          originX: origin.x + originJitterX,
-          originY: origin.y + originJitterY,
-          popX,
-          popY,
-          midX: popX * 0.65 + sway * 0.45,
-          midY: popY * 0.25 + 18 + r4 * 36,
-          rainX,
-          rainY,
-          delay: r1 * 0.16 + (j % 10) * 0.014 + oi * 0.04,
-          duration: 1.4 + r2 * 0.8,
-          rot0: r3 * 360,
-          rot1: (r4 - 0.5) * 540,
-          rot2: (r5 - 0.5) * 900,
-          w: shape === 'ribbon' ? 3 + r5 * 4 : shape === 'circle' ? 5 + r5 * 6 : 5 + r5 * 7,
-          h:
-            shape === 'ribbon'
-              ? 12 + r6 * 18
-              : shape === 'circle'
-                ? 5 + r5 * 6
-                : shape === 'square'
-                  ? 6 + r5 * 5
-                  : 4 + r6 * 5,
-          spin: r7 > 0.5 ? 1 : -1,
-          flutter: 0.7 + r8 * 0.6,
-        })
+      return {
+        i,
+        color: COLORS[Math.floor(r6 * COLORS.length)],
+        shape,
+        originX: ox + (r1 - 0.5) * 18,
+        originY: oy + (r2 - 0.5) * 10,
+        popX,
+        popY,
+        midX: popX * 0.7 + sway * 0.4,
+        midY: popY * 0.2 + 24 + r3 * 28,
+        rainX,
+        rainY,
+        delay: r1 * 0.12 + (i % 7) * 0.018,
+        duration: 1.45 + r2 * 0.55,
+        rot0: r3 * 360,
+        rot1: (r4 - 0.5) * 480,
+        rot2: (r5 - 0.5) * 720,
+        w: shape === 'ribbon' ? 3 + r5 * 3.5 : shape === 'circle' ? 5 + r5 * 5 : 5 + r5 * 6,
+        h:
+          shape === 'ribbon'
+            ? 11 + r6 * 14
+            : shape === 'circle'
+              ? 5 + r5 * 5
+              : shape === 'square'
+                ? 6 + r5 * 4
+                : 4 + r6 * 4,
+        spin: r6 > 0.5 ? 1 : -1,
       }
     })
-    return out
   }, [burst])
 
   useEffect(() => {
-    if (!burst) return
-    const t = window.setTimeout(onDone, BURST_MS)
-    return () => clearTimeout(t)
+    if (!burst) {
+      activeIdRef.current = null
+      return
+    }
+    activeIdRef.current = burst.id
+    const burstId = burst.id
+    const t = window.setTimeout(() => {
+      // Only complete if this burst is still the active one
+      if (activeIdRef.current === burstId) {
+        onDone(burstId)
+      }
+    }, BURST_MS)
+    return () => {
+      window.clearTimeout(t)
+    }
   }, [burst, onDone])
 
-  if (!burst) return null
+  if (!burst || pieces.length === 0) return null
 
   return (
     <div className="match-burst-layer" aria-hidden>
-      {/* Soft flashes at each origin (board tile / storage) */}
-      {burst.origins.map((o, i) => (
-        <div
-          key={i}
-          className="match-origin-flash"
-          style={{ left: o.x, top: o.y }}
-        />
-      ))}
-
+      <div
+        className="match-origin-flash"
+        style={{ left: burst.origin.x, top: burst.origin.y }}
+      />
       <div className="confetti-field confetti-field-anchored">
         {pieces.map((p) => (
           <span
-            key={p.i}
+            key={`${burst.id}-${p.i}`}
             className={`confetti confetti-${p.shape}`}
             style={
               {
@@ -176,7 +157,6 @@ export function MatchBurst({ burst, onDone }: Props) {
                 '--spin': p.spin,
                 '--w': `${p.w}px`,
                 '--h': `${p.h}px`,
-                '--flutter': p.flutter,
               } as CSSProperties
             }
           />
@@ -186,22 +166,37 @@ export function MatchBurst({ burst, onDone }: Props) {
   )
 }
 
-/** Resolve tile element centers relative to a container (game-screen). */
+/** Resolve tile element center relative to a container (game-screen). */
+export function getTileOrigin(
+  container: HTMLElement | null,
+  tileId: string,
+): MatchOrigin | null {
+  if (!container || !tileId) return null
+  // Avoid CSS.escape (not needed for our ids; safer across WebViews)
+  const nodes = container.querySelectorAll('[data-tile-id]')
+  let el: Element | null = null
+  for (const n of nodes) {
+    if (n.getAttribute('data-tile-id') === tileId) {
+      el = n
+      break
+    }
+  }
+  if (!el) return null
+  const cRect = container.getBoundingClientRect()
+  const r = el.getBoundingClientRect()
+  if (r.width < 1 || r.height < 1) return null
+  const x = r.left - cRect.left + r.width / 2
+  const y = r.top - cRect.top + r.height / 2
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  return { x, y }
+}
+
+/** @deprecated use getTileOrigin — kept for any leftover imports */
 export function getTileOrigins(
   container: HTMLElement | null,
   tileIds: string[],
 ): MatchOrigin[] {
-  if (!container) return []
-  const cRect = container.getBoundingClientRect()
-  const origins: MatchOrigin[] = []
-  for (const id of tileIds) {
-    const el = container.querySelector(`[data-tile-id="${CSS.escape(id)}"]`)
-    if (!el) continue
-    const r = el.getBoundingClientRect()
-    origins.push({
-      x: r.left - cRect.left + r.width / 2,
-      y: r.top - cRect.top + r.height / 2,
-    })
-  }
-  return origins
+  return tileIds
+    .map((id) => getTileOrigin(container, id))
+    .filter((o): o is MatchOrigin => o !== null)
 }
