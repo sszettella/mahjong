@@ -963,7 +963,7 @@
   pointer-events: none;
 }
 
-/* —— Match burst + confetti (anchored at match sites) —— */
+/* —— Match confetti (canvas physics) —— */
 .match-burst-layer {
   position: absolute;
   inset: 0;
@@ -972,149 +972,13 @@
   overflow: hidden;
 }
 
-/* Soft glow at the board tile / storage slot that matched */
-.match-origin-flash {
-  position: absolute;
-  width: 90px;
-  height: 90px;
-  margin-left: -45px;
-  margin-top: -45px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 240, 180, 0.65) 0%,
-    rgba(255, 200, 100, 0.25) 35%,
-    transparent 70%
-  );
-  animation: originFlash 0.7s ease-out forwards;
-  pointer-events: none;
-  z-index: 2;
-}
-
-@keyframes originFlash {
-  0% {
-    transform: scale(0.4);
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-
-/* Confetti — firework blast then gravity fall */
-.confetti-field {
+.confetti-canvas {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
   pointer-events: none;
-  z-index: 4;
-  overflow: hidden;
-}
-
-.confetti-field-anchored .confetti {
-  margin-left: calc(var(--w, 8px) / -2);
-  margin-top: calc(var(--h, 8px) / -2);
-}
-
-.confetti {
-  position: absolute;
-  width: var(--w, 8px);
-  height: var(--h, 8px);
-  background: var(--c, #ffd166);
-  opacity: 0;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  will-change: transform, opacity;
-  animation:
-    confettiFirework var(--dur, 1.9s) forwards,
-    confettiFade var(--dur, 1.9s) linear forwards;
-  animation-delay: var(--delay, 0s), var(--delay, 0s);
-  box-shadow:
-    0 0 4px color-mix(in srgb, var(--c, #e8e8e8) 70%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  transform-origin: center center;
-  pointer-events: none;
-}
-
-.confetti-rect {
-  border-radius: 1px;
-}
-
-.confetti-square {
-  border-radius: 1.5px;
-}
-
-.confetti-circle {
-  border-radius: 50%;
-}
-
-.confetti-ribbon {
-  border-radius: 1px;
-  transform-origin: 50% 15%;
-}
-
-/*
- * Natural confetti arc:
- * 1) leave center with impulse
- * 2) apex (burst peak)
- * 3) mid-fall (drag + gravity)
- * 4) land off-screen
- * Per-keyframe timing-functions = continuous motion, no hangs.
- */
-@keyframes confettiFirework {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.2);
-    animation-timing-function: cubic-bezier(0.4, 0.0, 0.6, 0.4);
-  }
-  /* Leave the spark point */
-  10% {
-    transform: translate3d(
-        calc(var(--burst-x) * 0.12),
-        calc(var(--burst-y) * 0.12),
-        0
-      )
-      rotate(calc(var(--rot0) + var(--spin-amt) * 0.08 * var(--spin, 1)))
-      scale(0.7);
-    animation-timing-function: cubic-bezier(0.15, 0.65, 0.25, 1);
-  }
-  /* Apex of the pop */
-  28% {
-    transform: translate3d(var(--burst-x), var(--burst-y), 0)
-      rotate(calc(var(--rot0) + var(--spin-amt) * 0.35 * var(--spin, 1)))
-      scale(1.05);
-    animation-timing-function: cubic-bezier(0.35, 0.0, 0.55, 0.35);
-  }
-  /* Falling — horizontal slowed by drag, vertical accelerating */
-  55% {
-    transform: translate3d(var(--mid-x), var(--mid-y), 0)
-      rotate(calc(var(--rot0) + var(--spin-amt) * 0.65 * var(--spin, 1)))
-      scale(0.95);
-    animation-timing-function: cubic-bezier(0.4, 0.0, 0.7, 0.2);
-  }
-  100% {
-    transform: translate3d(var(--fall-x), var(--fall-y), 0)
-      rotate(calc(var(--rot0) + var(--spin-amt) * var(--spin, 1)))
-      scale(0.55);
-  }
-}
-
-@keyframes confettiFade {
-  0% {
-    opacity: 0;
-  }
-  4% {
-    opacity: 1;
-  }
-  62% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
 }
 
 .storage-count.at-limit,
