@@ -138,22 +138,30 @@ export function HomeScreen({ progress, onPlay, onLevels, onHowTo }: Props) {
       {showInstallHelp && !installed && (
         <div ref={installHelpRef} className="install-help" tabIndex={-1}>
           <h3>Play anywhere, even offline</h3>
+          <div className="install-icon-preview" aria-hidden>
+            <img src={`${import.meta.env.BASE_URL}apple-touch-icon.png?v=3`} alt="" width={72} height={72} />
+          </div>
           <ol>
             <li>
-              Open this site in <strong>Safari</strong> on your iPhone
+              Use <strong>Safari</strong> (not Chrome) — only Safari installs the real app icon
             </li>
             <li>
-              Tap the <strong>Share</strong> button
+              Open exactly:{' '}
+              <strong className="install-url">sszettella.github.io/mahjong/</strong>
             </li>
             <li>
-              Tap <strong>Add to Home Screen</strong>
+              Delete any old <strong>Mahjong</strong> icon from your Home Screen first
             </li>
             <li>
-              Open <strong>Mahjong</strong> from your home screen — works offline after this visit
+              Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>
+            </li>
+            <li>
+              Confirm the preview shows the green tile icon, then tap <strong>Add</strong>
             </li>
           </ol>
           <p className="install-note">
-            The first open downloads the game to your phone. After that you don’t need Wi‑Fi.
+            First open caches the game offline. If the icon is still a screenshot, force-quit Safari,
+            reopen the link above, and add again.
           </p>
         </div>
       )}

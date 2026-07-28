@@ -20,6 +20,9 @@ export default defineConfig({
         'favicon-64.png',
         'favicon-192.png',
         'apple-touch-icon.png',
+        'apple-touch-icon-120.png',
+        'apple-touch-icon-152.png',
+        'apple-touch-icon-167.png',
         'pwa-192.png',
         'pwa-512.png',
         'icon-1024.png',
@@ -36,12 +39,6 @@ export default defineConfig({
         scope: base,
         id: base,
         icons: [
-          {
-            src: 'favicon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any',
-          },
           {
             src: 'pwa-192.png',
             sizes: '192x192',

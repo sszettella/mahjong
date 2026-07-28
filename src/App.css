@@ -215,6 +215,26 @@
   line-height: 1.4;
 }
 
+.install-icon-preview {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 12px;
+}
+
+.install-icon-preview img {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.install-url {
+  display: inline;
+  word-break: break-all;
+  color: var(--gold);
+  font-weight: 700;
+}
+
 /* —— Buttons —— */
 .btn {
   display: inline-flex;
