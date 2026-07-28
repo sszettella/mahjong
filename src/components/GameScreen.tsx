@@ -124,9 +124,6 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
       if (showWin || showFail || animating) return
       setHintIds([])
 
-      setFlashId(id)
-      window.setTimeout(() => setFlashId((cur) => (cur === id ? null : cur)), 160)
-
       const result = applyFreeTileClick(board, storage, id)
       if (result.type === 'invalid') return
 
@@ -156,7 +153,8 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
 
         const burstId = ++burstSeq.current
         setAnimating(true)
-        // Don't flash the board tile that was tapped — only confetti from storage
+        // No board-tile select/match flash — confetti only from storage
+        setFlashId(null)
         setMatchingIds([])
         setMatchBurst({
           id: burstId,
@@ -185,7 +183,9 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
         return
       }
 
-      // Park into storage — light pop on the destination slot
+      // Park into storage — brief press feedback only for parks, not matches
+      setFlashId(id)
+      window.setTimeout(() => setFlashId((cur) => (cur === id ? null : cur)), 160)
       setBoard(result.board)
       setStorage(result.storage)
       setStats((s) => ({ ...s, moves: s.moves + 1 }))
