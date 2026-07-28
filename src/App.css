@@ -987,7 +987,7 @@
   }
 }
 
-/* Confetti — continuous rain (no multi-stop keyframes = no pauses) */
+/* Confetti — firework blast then gravity fall */
 .confetti-field {
   position: absolute;
   inset: 0;
@@ -1010,12 +1010,11 @@
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   will-change: transform, opacity;
-  /* Linear rotation + ease-in fall feel smooth with only 2 transform keyframes */
   animation:
-    confettiFall var(--dur, 1.7s) cubic-bezier(0.33, 0.0, 0.67, 0.35) forwards,
-    confettiFade var(--dur, 1.7s) linear forwards;
+    confettiFirework var(--dur, 1.4s) forwards,
+    confettiFade var(--dur, 1.4s) linear forwards;
   animation-delay: var(--delay, 0s), var(--delay, 0s);
-  box-shadow: none;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--c, #ffd166) 55%, transparent);
   transform-origin: center center;
   pointer-events: none;
 }
@@ -1038,17 +1037,26 @@
 }
 
 /*
- * Only start + end for position: CSS eases continuously between them.
- * Multi-step keyframes were causing visible "hangs" at each stop.
+ * Firework: explode outward fast (ease-out), then fall (ease-in).
+ * Per-keyframe timing-function keeps the whole path smooth — no hangs.
  */
-@keyframes confettiFall {
+@keyframes confettiFirework {
   0% {
-    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.55);
+    transform: translate3d(0, 0, 0) rotate(var(--rot0, 0deg)) scale(0.25);
+    animation-timing-function: cubic-bezier(0.12, 0.75, 0.28, 1);
   }
+  /* Blast peak — pieces fly outward in all directions */
+  22% {
+    transform: translate3d(var(--burst-x), var(--burst-y), 0)
+      rotate(calc(var(--rot0) + var(--spin-amt) * 0.35 * var(--spin, 1)))
+      scale(1.15);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.75, 0.25);
+  }
+  /* Gravity — accelerate downward past the blast */
   100% {
-    transform: translate3d(var(--end-x), var(--end-y), 0)
+    transform: translate3d(var(--fall-x), var(--fall-y), 0)
       rotate(calc(var(--rot0) + var(--spin-amt) * var(--spin, 1)))
-      scale(0.7);
+      scale(0.65);
   }
 }
 
@@ -1056,10 +1064,10 @@
   0% {
     opacity: 0;
   }
-  6% {
+  4% {
     opacity: 1;
   }
-  78% {
+  70% {
     opacity: 1;
   }
   100% {

@@ -9,7 +9,7 @@ export interface MatchOrigin {
 export interface MatchBurstData {
   id: number
   matchNumber: number
-  /** Single origin — confetti rains from one place only */
+  /** Single origin — confetti explodes from one place only */
   origin: MatchOrigin
 }
 
@@ -18,8 +18,8 @@ interface Props {
   onDone: (burstId: number) => void
 }
 
-const PIECE_COUNT = 42
-const BURST_MS = 2000
+const PIECE_COUNT = 64
+const BURST_MS = 1800
 
 const COLORS = [
   '#ff5c5c',
@@ -34,6 +34,8 @@ const COLORS = [
   '#ffffff',
   '#e8b84a',
   '#f0a0c8',
+  '#fff3a0',
+  '#ff6b6b',
 ]
 
 type Shape = 'rect' | 'ribbon' | 'circle' | 'square'
@@ -51,11 +53,8 @@ export function MatchBurst({ burst, onDone }: Props) {
   const pieces = useMemo(() => {
     if (!burst) return []
     const { origin, id, matchNumber } = burst
-    // Guard invalid origins (NaN / off-screen) so animation never "breaks"
-    const ox =
-      Number.isFinite(origin.x) && origin.x > 0 ? origin.x : 0
-    const oy =
-      Number.isFinite(origin.y) && origin.y > 0 ? origin.y : 80
+    const ox = Number.isFinite(origin.x) && origin.x > 0 ? origin.x : 0
+    const oy = Number.isFinite(origin.y) && origin.y > 0 ? origin.y : 80
     const seed = id * 97 + matchNumber * 13
 
     return Array.from({ length: PIECE_COUNT }, (_, i) => {
@@ -66,35 +65,43 @@ export function MatchBurst({ burst, onDone }: Props) {
       const r5 = seeded(seed + i * 11 + 23)
       const r6 = seeded(seed + i * 13 + 41)
 
-      const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon']
+      const shapes: Shape[] = ['rect', 'ribbon', 'circle', 'square', 'ribbon', 'circle']
       const shape = shapes[Math.floor(r1 * shapes.length)]
 
-      // Continuous path: drift sideways + fall off screen (no mid waypoints)
-      const endX = (r2 - 0.5) * 120
-      const endY = 300 + r3 * 380
+      // Full 360° firework spray — even spokes + jitter
+      const angle = (i / PIECE_COUNT) * Math.PI * 2 + (r1 - 0.5) * 0.55
+      const power = 70 + r2 * 160 // explosive reach
+      const burstX = Math.cos(angle) * power
+      const burstY = Math.sin(angle) * power * 0.95 - 12 // slight upward bias
+
+      // After the blast, gravity pulls everything down
+      const fallX = burstX * 1.08 + (r3 - 0.5) * 36
+      const fallY = burstY + 220 + r4 * 280
 
       return {
         i,
         color: COLORS[Math.floor(r6 * COLORS.length)],
         shape,
-        originX: ox + (r1 - 0.5) * 14,
-        originY: oy + (r2 - 0.5) * 8,
-        endX,
-        endY,
-        // Short stagger so rain looks full without choppy waves
-        delay: r1 * 0.08 + (i % 6) * 0.012,
-        duration: 1.55 + r2 * 0.5,
+        originX: ox + (r1 - 0.5) * 6,
+        originY: oy + (r2 - 0.5) * 6,
+        burstX,
+        burstY,
+        fallX,
+        fallY,
+        // Near-simultaneous bang (tiny stagger only)
+        delay: r1 * 0.04 + (i % 4) * 0.008,
+        duration: 1.15 + r2 * 0.45,
         rot0: r3 * 360,
-        spinAmt: 200 + r4 * 520,
-        w: shape === 'ribbon' ? 3 + r5 * 3.5 : shape === 'circle' ? 5 + r5 * 5 : 5 + r5 * 6,
+        spinAmt: 280 + r4 * 640,
+        w: shape === 'ribbon' ? 3 + r5 * 4 : shape === 'circle' ? 5 + r5 * 6 : 5 + r5 * 7,
         h:
           shape === 'ribbon'
-            ? 11 + r6 * 14
+            ? 12 + r6 * 16
             : shape === 'circle'
-              ? 5 + r5 * 5
+              ? 5 + r5 * 6
               : shape === 'square'
-                ? 6 + r5 * 4
-                : 4 + r6 * 4,
+                ? 6 + r5 * 5
+                : 4 + r6 * 5,
         spin: r6 > 0.5 ? 1 : -1,
       }
     })
@@ -108,21 +115,15 @@ export function MatchBurst({ burst, onDone }: Props) {
     activeIdRef.current = burst.id
     const burstId = burst.id
     const t = window.setTimeout(() => {
-      // Only complete if this burst is still the active one
-      if (activeIdRef.current === burstId) {
-        onDone(burstId)
-      }
+      if (activeIdRef.current === burstId) onDone(burstId)
     }, BURST_MS)
-    return () => {
-      window.clearTimeout(t)
-    }
+    return () => window.clearTimeout(t)
   }, [burst, onDone])
 
   if (!burst || pieces.length === 0) return null
 
   return (
     <div className="match-burst-layer" aria-hidden>
-      {/* Confetti only — no origin flash (distracting on the board tile / storage) */}
       <div className="confetti-field confetti-field-anchored">
         {pieces.map((p) => (
           <span
@@ -133,8 +134,10 @@ export function MatchBurst({ burst, onDone }: Props) {
                 left: p.originX,
                 top: p.originY,
                 '--c': p.color,
-                '--end-x': `${p.endX}px`,
-                '--end-y': `${p.endY}px`,
+                '--burst-x': `${p.burstX}px`,
+                '--burst-y': `${p.burstY}px`,
+                '--fall-x': `${p.fallX}px`,
+                '--fall-y': `${p.fallY}px`,
                 '--delay': `${p.delay}s`,
                 '--dur': `${p.duration}s`,
                 '--rot0': `${p.rot0}deg`,
@@ -157,7 +160,6 @@ export function getTileOrigin(
   tileId: string,
 ): MatchOrigin | null {
   if (!container || !tileId) return null
-  // Avoid CSS.escape (not needed for our ids; safer across WebViews)
   const nodes = container.querySelectorAll('[data-tile-id]')
   let el: Element | null = null
   for (const n of nodes) {
@@ -176,7 +178,6 @@ export function getTileOrigin(
   return { x, y }
 }
 
-/** @deprecated use getTileOrigin — kept for any leftover imports */
 export function getTileOrigins(
   container: HTMLElement | null,
   tileIds: string[],
