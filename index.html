@@ -3,25 +3,24 @@
   <head>
     <meta charset="UTF-8" />
 
-    <!-- Browser tab icons (Vite rewrites /… with base /mahjong/ on Pages) -->
+    <!-- Tab icons (under /mahjong/) -->
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
 
     <!--
-      iOS Home Screen icons (Share sheet uses favicon; Home Screen uses these).
-      Requirements that matter for iOS:
-      - No ?query on the URL
-      - Opaque RGB PNG (no alpha)
-      - Full-bleed square (iOS applies its own rounded mask)
+      iOS Home Screen: Safari often probes the DOMAIN ROOT, not the /mahjong/
+      subpath. Icons are hosted at https://sszettella.github.io/apple-touch-icon.png
+      (user Pages site). Absolute root URLs make Add to Home Screen reliable.
     -->
+    <link rel="apple-touch-icon" href="https://sszettella.github.io/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://sszettella.github.io/apple-touch-icon-180x180.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="https://sszettella.github.io/apple-touch-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="https://sszettella.github.io/apple-touch-icon-120x120.png" />
+    <link rel="apple-touch-icon-precomposed" href="https://sszettella.github.io/apple-touch-icon-precomposed.png" />
+    <!-- Fallbacks under /mahjong/ if root is unavailable -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180.png" />
-    <link rel="apple-touch-icon" sizes="167x167" href="/apple-touch-icon-167.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120.png" />
-    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png" />
 
     <meta
       name="viewport"

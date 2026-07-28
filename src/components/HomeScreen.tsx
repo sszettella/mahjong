@@ -140,7 +140,7 @@ export function HomeScreen({ progress, onPlay, onLevels, onHowTo }: Props) {
           <h3>Play anywhere, even offline</h3>
           <div className="install-icon-preview" aria-hidden>
             <img
-              src={`${import.meta.env.BASE_URL}apple-touch-icon.png`}
+              src="https://sszettella.github.io/apple-touch-icon.png"
               alt=""
               width={72}
               height={72}
@@ -148,28 +148,28 @@ export function HomeScreen({ progress, onPlay, onLevels, onHowTo }: Props) {
           </div>
           <ol>
             <li>
-              Use <strong>Safari</strong> only (Chrome’s Share sheet can show a favicon, then
-              drop a screenshot on the Home Screen)
-            </li>
-            <li>
-              Open exactly:{' '}
-              <strong className="install-url">https://sszettella.github.io/mahjong/</strong>
-              (include the trailing <strong>/</strong>)
+              Use <strong>Safari</strong> only (not Chrome)
             </li>
             <li>
               Delete every old <strong>Mahjong</strong> Home Screen icon
             </li>
             <li>
-              Force-quit Safari completely, then reopen that URL and wait for the game to load
+              Settings → Safari → <strong>Clear History and Website Data</strong>, then
+              force-quit Safari
             </li>
             <li>
-              Tap <strong>Share</strong> → <strong>Add to Home Screen</strong> → <strong>Add</strong>
+              Open{' '}
+              <strong className="install-url">https://sszettella.github.io/mahjong/</strong>
+              and wait for the game to fully load
+            </li>
+            <li>
+              Share → <strong>Add to Home Screen</strong> → <strong>Add</strong>
             </li>
           </ol>
           <p className="install-note">
-            The Share sheet icon is not the same as the Home Screen icon. After adding, the
-            home icon should match the green tile above. If not, Settings → Safari → Clear
-            History and Website Data, then try once more.
+            Home Screen icons are loaded from the site root (iOS ignores subdirectory icons).
+            That is fixed now. The Share sheet may still show a different small favicon — the
+            home icon should match the green tile above.
           </p>
         </div>
       )}
