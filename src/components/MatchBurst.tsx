@@ -122,10 +122,7 @@ export function MatchBurst({ burst, onDone }: Props) {
 
   return (
     <div className="match-burst-layer" aria-hidden>
-      <div
-        className="match-origin-flash"
-        style={{ left: burst.origin.x, top: burst.origin.y }}
-      />
+      {/* Confetti only — no origin flash (distracting on the board tile / storage) */}
       <div className="confetti-field confetti-field-anchored">
         {pieces.map((p) => (
           <span

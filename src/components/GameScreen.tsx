@@ -156,7 +156,8 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
 
         const burstId = ++burstSeq.current
         setAnimating(true)
-        setMatchingIds([id, result.matchedId])
+        // Don't flash the board tile that was tapped — only confetti from storage
+        setMatchingIds([])
         setMatchBurst({
           id: burstId,
           matchNumber: nextStats.matches,
