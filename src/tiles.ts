@@ -111,16 +111,17 @@ export function buildFullFacePool(): TileFace[] {
   return faces
 }
 
-/** Two faces match if identical, or both flowers, or both seasons. */
+/**
+ * Two faces match only when they look the same: same suit + same value.
+ * (Previously flowers/seasons matched as wild groups, so e.g. Plum could
+ * match Orchid — correct for classic solitaire, but looked like a bug.)
+ */
 export function facesMatch(a: TileFace, b: TileFace): boolean {
-  if (a.suit === 'flowers' && b.suit === 'flowers') return true
-  if (a.suit === 'seasons' && b.suit === 'seasons') return true
   return a.suit === b.suit && a.value === b.value
 }
 
+/** Stable key for pairing deals — must match facesMatch identity. */
 export function faceKey(f: TileFace): string {
-  if (f.suit === 'flowers') return 'flowers'
-  if (f.suit === 'seasons') return 'seasons'
   return `${f.suit}-${f.value}`
 }
 
@@ -164,7 +165,6 @@ export function pickPairedFaces(count: number, rng: () => number): TileFace[] {
   for (const key of keys) {
     if (need <= 0) break
     const group = groups.get(key)!
-    // Flowers/seasons: take all 4 as 2 pairs if available
     const pairsAvailable = Math.floor(group.length / 2)
     const takePairs = Math.min(pairsAvailable, Math.floor(need / 2))
     for (let p = 0; p < takePairs; p++) {

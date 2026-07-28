@@ -47,7 +47,8 @@ export function HowToPlay({ onBack }: Props) {
         <section>
           <h3>Matching</h3>
           <p>
-            Identical faces match. Flowers match any flower; seasons match any season.
+            Only identical faces match — same suit and number/symbol. If two tiles look
+            different, they are not a pair.
           </p>
         </section>
         <section>
