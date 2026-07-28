@@ -88,6 +88,13 @@ export function getAllLevels(): LevelConfig[] {
   return Array.from({ length: 100 }, (_, i) => getLevelConfig(i + 1))
 }
 
+/**
+ * Stars for a cleared level (1–3).
+ *
+ * In this game every pair is: park one free tile → match the second.
+ * So a perfect clear is ~2 moves per pair = `tileCount` moves total
+ * (not tileCount/2, which is classic solitaire without storage parking).
+ */
 export function starsForLevel(
   level: number,
   moves: number,
@@ -95,13 +102,22 @@ export function starsForLevel(
   undosUsed: number,
   tileCount: number,
 ): number {
-  const minMoves = tileCount / 2
-  const efficiency = moves / Math.max(1, minMoves)
+  // Perfect = one park + one match for each pair
+  const minMoves = Math.max(1, tileCount)
+  const efficiency = moves / minMoves
   let stars = 3
+
+  // Tool use
   if (hintsUsed > 0 || undosUsed > 2) stars = Math.min(stars, 2)
   if (hintsUsed > 2 || undosUsed > 5) stars = Math.min(stars, 1)
-  if (efficiency > 1.5) stars = Math.min(stars, 2)
-  if (efficiency > 2.2) stars = Math.min(stars, 1)
+
+  // Extra parks / thrashing beyond a clean park→match path
+  // 1.0 = ideal; allow a little slack for unavoidable dead-ends
+  if (efficiency > 1.25) stars = Math.min(stars, 2)
+  if (efficiency > 1.7) stars = Math.min(stars, 1)
+
+  // Hard levels: any help costs a star
   if (level >= 50 && (hintsUsed > 0 || undosUsed > 0)) stars = Math.min(stars, 2)
+
   return Math.max(1, stars)
 }

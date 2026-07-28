@@ -60,7 +60,10 @@ export function HowToPlay({ onBack }: Props) {
         </section>
         <section>
           <h3>Stars</h3>
-          <p>Earn up to 3 stars per level with efficient play and fewer hints/undos.</p>
+          <p>
+            Earn up to 3 stars per level. Perfect play is about one park + one match for each
+            pair, with no hints and few undos. Extra parking or thrashing costs stars.
+          </p>
         </section>
         <section>
           <h3>No ads</h3>
