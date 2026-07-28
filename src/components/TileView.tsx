@@ -66,6 +66,7 @@ export function TileView({
       disabled={!free || matching}
       aria-label={`${tile.face.label}${buried ? ' (under stack)' : free ? '' : ' (blocked)'}${selected ? ' selected' : ''}`}
       data-face={faceKey(tile.face)}
+      data-tile-id={tile.id}
       data-z={tile.z}
     >
       {buried ? (

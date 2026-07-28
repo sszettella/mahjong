@@ -86,6 +86,7 @@ export function StorageRack({
                 style={slotStyle}
                 aria-label={`${tile.face.label} in storage`}
                 data-face={faceKey(tile.face)}
+                data-tile-id={tile.id}
               >
                 <TileFaceContent tile={tile} />
                 {matching && <span className="tile-match-glow" aria-hidden />}

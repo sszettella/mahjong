@@ -14,7 +14,7 @@ import { facesMatch, shuffle, mulberry32 } from '../tiles'
 import { completeLevel } from '../storage'
 import { Board } from './Board'
 import { StorageRack } from './StorageRack'
-import { MatchBurst, type MatchBurstData } from './MatchBurst'
+import { getTileOrigins, MatchBurst, type MatchBurstData } from './MatchBurst'
 
 interface Props {
   level: number
@@ -57,6 +57,7 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
   const [boardTileSize, setBoardTileSize] = useState<{ w: number; h: number } | null>(null)
   const burstSeq = useRef(0)
   const animTimer = useRef<number | null>(null)
+  const gameScreenRef = useRef<HTMLDivElement>(null)
 
   const handleTileSize = useCallback((size: { w: number; h: number }) => {
     setBoardTileSize((prev) => {
@@ -147,23 +148,27 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
       setHistory((h) => [...h, cloneSnapshot(board, storage)])
 
       if (result.type === 'match') {
-        const boardTile = board.find((t) => t.id === id)!
-        const storageTile = storage.find((t) => t?.id === result.matchedId)!
         const nextStats = {
           ...stats,
           moves: stats.moves + 1,
           matches: stats.matches + 1,
         }
 
-        // Phase 1: highlight both tiles + launch burst overlay
+        // Capture positions before tiles disappear — confetti rains from match sites
+        const origins = getTileOrigins(gameScreenRef.current, [id, result.matchedId])
+        // Prefer storage-first ordering (user often looks at tray); keep both if found
+        const storageFirst = [...origins].sort((a, b) => a.y - b.y)
+
         setAnimating(true)
         setMatchingIds([id, result.matchedId])
         burstSeq.current += 1
         setMatchBurst({
           id: burstSeq.current,
-          boardTile,
-          storageTile,
           matchNumber: nextStats.matches,
+          origins:
+            storageFirst.length > 0
+              ? storageFirst
+              : [{ x: window.innerWidth / 2, y: 120 }],
         })
 
         try {
@@ -172,7 +177,7 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
           /* ignore */
         }
 
-        // Phase 2: commit removal mid-animation so the board updates cleanly
+        // Commit removal mid-animation; confetti continues from captured origins
         clearAnimTimer()
         animTimer.current = window.setTimeout(() => {
           setBoard(result.board)
@@ -181,7 +186,7 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
           setMatchingIds([])
           setAnimating(false)
           finishWin(result.board, result.storage, nextStats)
-        }, 320)
+        }, 280)
 
         return
       }
@@ -288,7 +293,10 @@ export function GameScreen({ level, progress, onProgress, onBack, onNext }: Prop
   }, [board, matchingIds])
 
   return (
-    <div className={`screen game-screen ${animating ? 'is-matching' : ''}`}>
+    <div
+      ref={gameScreenRef}
+      className={`screen game-screen ${animating ? 'is-matching' : ''}`}
+    >
       <header className="game-header">
         <button type="button" className="btn-icon" onClick={onBack} aria-label="Back">
           ←
