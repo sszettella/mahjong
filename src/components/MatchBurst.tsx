@@ -21,21 +21,22 @@ interface Props {
 const PIECE_COUNT = 52
 const BURST_MS = 2600
 
+/** Chrome / silver metal palette */
 const COLORS = [
-  '#ff5c5c',
-  '#ff8a3d',
-  '#ffd166',
-  '#ffe566',
-  '#6ddf8c',
-  '#3dd9c0',
-  '#5eb3ff',
-  '#8b7cff',
-  '#ff6bcb',
-  '#ffffff',
-  '#e8b84a',
-  '#f0a0c8',
-  '#fff3a0',
-  '#ff6b6b',
+  '#f8f9fa',
+  '#e9ecef',
+  '#dee2e6',
+  '#ced4da',
+  '#adb5bd',
+  '#c0c0c0',
+  '#d8d8d8',
+  '#e8e8e8',
+  '#b8b8b8',
+  '#a0a0a0',
+  '#f0f0f0',
+  '#9aa0a6',
+  '#d4d4d8',
+  '#e4e4e7',
 ]
 
 type Shape = 'rect' | 'ribbon' | 'circle' | 'square'

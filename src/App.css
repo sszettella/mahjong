@@ -1033,7 +1033,9 @@
     confettiFirework var(--dur, 1.9s) forwards,
     confettiFade var(--dur, 1.9s) linear forwards;
   animation-delay: var(--delay, 0s), var(--delay, 0s);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--c, #ffd166) 55%, transparent);
+  box-shadow:
+    0 0 4px color-mix(in srgb, var(--c, #e8e8e8) 70%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
   transform-origin: center center;
   pointer-events: none;
 }
